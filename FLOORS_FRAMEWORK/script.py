@@ -202,11 +202,11 @@ for i in range(0,len(self_representative_agg_brands)):
   newdf['BPC_potencial']= df_bpc_filtered['VISITS_COMPETITIVE_POTENTIAL'].sum()/df_bpc_filtered['VISITS_MATCH'].sum()
   # newdf['BPC_NEW_0']= sum(df_bpc_filtered['VISITS_COMPETITIVE_NEW_0'])/sum(df_bpc_filtered['VISITS_MATCH'])
 
-  newdf['BPC_tgt']= np.mean(df_agg_brands_inputs_filtered['TARGET_PRIORIZED'])
+  newdf['BPC_tgt']= df_agg_brands_inputs_filtered['TARGET_PRIORIZED'].mean()
   newdf['VISITS_MATCH'] = df_bpc_filtered['VISITS_MATCH'].sum()
 
   newdf['VM_lm']= df_agg_brands_inputs_filtered['UE_MNG_VENDOR_MARGIN_AMT_LC_LM'].sum()/df_agg_brands_inputs_filtered['UE_MNG_REVENUE_GROSS_AMT_LC_LM'].sum()
-  newdf['VM_tgt']= df_agg_brands_inputs_filtered['TGT_VENDOR_MARGIN_PERC_REV'].sum()
+  newdf['VM_tgt']= df_agg_brands_inputs_filtered['TGT_VENDOR_MARGIN_PERC_REV'].mean()
 
   newdf['UE_MNG_REVENUE_GROSS_AMT_LC_LM'] = df_agg_brands_inputs_filtered['UE_MNG_REVENUE_GROSS_AMT_LC_LM'].sum()
   newdf['UE_MNG_NON_BANK_COUPONS_DISCOUNT_AMT_LC_LM'] = df_agg_brands_inputs_filtered['UE_MNG_NON_BANK_COUPONS_DISCOUNT_AMT_LC_LM'].sum()
