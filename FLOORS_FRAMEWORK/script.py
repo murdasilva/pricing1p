@@ -2,7 +2,7 @@
 
 import pandas as pd
 pd.options.display.max_columns = 300
-pd.options.display.max_rows = 20
+pd.options.display.max_rows = 70
 
 import requests as req
 import numpy as np
@@ -291,21 +291,21 @@ output_df['BUCKET'][(output_df['BPC_NEW_X']<output_df['BPC_tgt']) ] = '6. REVISA
 #Adicionar coluna de piso final
 output_df['FINAL_PPM_FLOOR'] = np.nan
 output_df['FINAL_PPM_FLOOR'][output_df['BUCKET'] == '1. MANTENER']= output_df['CURRENT_PPM_FLOOR']
-output_df['FINAL_PPM_FLOOR'][output_df['BUCKET'] == '4. RENTABILIZAR A TARGET']= output_df['NEW_PPM']
-output_df['FINAL_PPM_FLOOR'][output_df['BUCKET'] == '5. RENTABILIZAR PARCIALMENTE']= output_df['NEW_PPM']
-output_df['FINAL_PPM_FLOOR'][output_df['BUCKET'] == '2. COMPETITIVIZAR']= output_df['NEW_PPM']
-output_df['FINAL_PPM_FLOOR'][output_df['BUCKET'] == '3. INVERTIR']= output_df['NEW_PPM']
+output_df['FINAL_PPM_FLOOR'][output_df['BUCKET'] == '4. RENTABILIZAR A TARGET']= output_df[['NEW_PPM','CURRENT_PPM_FLOOR']].max(axis=1)
+output_df['FINAL_PPM_FLOOR'][output_df['BUCKET'] == '5. RENTABILIZAR PARCIALMENTE']= output_df[['NEW_PPM','CURRENT_PPM_FLOOR']].max(axis=1)
+output_df['FINAL_PPM_FLOOR'][output_df['BUCKET'] == '2. COMPETITIVIZAR']= output_df[['NEW_PPM','CURRENT_PPM_FLOOR']].min(axis=1)
+output_df['FINAL_PPM_FLOOR'][output_df['BUCKET'] == '3. INVERTIR']= output_df[['NEW_PPM','CURRENT_PPM_FLOOR']].min(axis=1)
 output_df['FINAL_PPM_FLOOR'][output_df['BUCKET'] == '6. REVISAR']= output_df['CURRENT_PPM_FLOOR']
 
 #Adicionar coluna de Governança
 
 output_df['GOVERNANCE'] = np.nan
-output_df['GOVERNANCE'][output_df['FINAL_PPM_FLOOR'] < 0]= 'C. DIRECTOR/VP'
+output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'] < 0) & ((output_df['BUCKET'] == '2. COMPETITIVIZAR') |(output_df['BUCKET'] == '3. INVERTIR')  ) ]= 'C. DIRECTOR/VP'
 output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'] >= 0) & (output_df['BUCKET'] == '1. MANTENER')]= 'A. PRICING'
 output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'] >= 0) & (output_df['BUCKET'] == '2. COMPETITIVIZAR')]= 'A. PRICING'
 output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'] >= 0) & (output_df['BUCKET'] == '4. RENTABILIZAR A TARGET')]= 'A. PRICING'
 output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'] >= 0) & (output_df['BUCKET'] == '5. RENTABILIZAR PARCIALMENTE')]= 'A. PRICING'
-output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'] >= 0) & (output_df['BUCKET'] == 'C. 3. INVERTIR') & (output_df['VM_lm'] - output_df['VM_LM_NEW_X_PERC_REV'] <= 0.01 ) ]= 'A. PRICING'
+output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'] >= 0) & (output_df['BUCKET'] == '3. INVERTIR') & (output_df['VM_lm'] - output_df['VM_LM_NEW_X_PERC_REV'] <= 0.01 ) ]= 'A. PRICING'
 output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'] >= 0) & (output_df['BUCKET'] == '3. INVERTIR') & (output_df['VM_lm'] - output_df['VM_LM_NEW_X_PERC_REV'] > 0.01 ) ]= 'B. MANAGER/DIRECTOR'
 # output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'] >= 0) & (output_df['BUCKET'] == '3. INVERTIR') & (output_df['VM_lm'] - output_df['VM_LM_NEW_X_PERC_REV'] > 0.01 ) & (output_df['VM_lm'] - output_df['VM_LM_NEW_X_PERC_REV'] <= 0.05 )]= 'B. MANAGER/DIRECTOR'
 # output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'] >= 0) & (output_df['BUCKET'] == '3. INVERTIR') & (output_df['VM_lm'] - output_df['VM_LM_NEW_X_PERC_REV'] > 0.01 ) & (output_df['VM_lm'] - output_df['VM_LM_NEW_X_PERC_REV'] > 0.05 )]= 'C. DIRECTOR/VP'
@@ -325,9 +325,14 @@ pd.pivot_table(output_df[output_df['ITE_ATT_BRAND']=='ALL_BRANDS'], values=['VIS
 
 
 # CHECAR SE TEM CASOS ASSIM
-output_df[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND','BPC_original','BPC_potencial','BPC_tgt','VISITS_MATCH','VM_lm','VM_tgt','NEW_PPM','BPC_NEW_X','VM_LM_NEW_X_PERC_REV','CURRENT_PPM_FLOOR','FINAL_PPM_FLOOR','BUCKET','GOVERNANCE']][(output_df['BUCKET']=='5. RENTABILIZAR PARCIALMENTE') & (output_df['GOVERNANCE']=='C. DIRECTOR/VP')]
+output_df[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND','BPC_original','BPC_potencial','BPC_tgt','VISITS_MATCH','VM_lm','VM_tgt','NEW_PPM','BPC_NEW_X','VM_LM_NEW_X_PERC_REV','CURRENT_PPM_FLOOR','FINAL_PPM_FLOOR','BUCKET','GOVERNANCE']][((output_df['BUCKET']=='5. RENTABILIZAR PARCIALMENTE') | (output_df['BUCKET']=='4. RENTABILIZAR A TARGET')) & (output_df['VM_LM_NEW_X_PERC_REV'] - output_df['VM_lm']  < 0 )]
+output_df[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND','BPC_original','BPC_potencial','BPC_tgt','VISITS_MATCH','VM_lm','VM_tgt','NEW_PPM','BPC_NEW_X','VM_LM_NEW_X_PERC_REV','CURRENT_PPM_FLOOR','FINAL_PPM_FLOOR','BUCKET','GOVERNANCE']][((output_df['BUCKET']=='5. RENTABILIZAR PARCIALMENTE') | (output_df['BUCKET']=='4. RENTABILIZAR A TARGET')) & (output_df['FINAL_PPM_FLOOR'] - output_df['CURRENT_PPM_FLOOR']  < 0 )]
+
+#BPC
+output_df[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND','BPC_original','BPC_potencial','BPC_tgt','VISITS_MATCH','VM_lm','VM_tgt','NEW_PPM','BPC_NEW_X','VM_LM_NEW_X_PERC_REV','CURRENT_PPM_FLOOR','FINAL_PPM_FLOOR','BUCKET','GOVERNANCE']][((output_df['BUCKET']=='3. INVERTIR') | (output_df['BUCKET']=='2. COMPETITIVIZAR')) & (output_df['BPC_NEW_X'] - output_df['BPC_potencial']  < 0 )]
+output_df[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND','BPC_original','BPC_potencial','BPC_tgt','VISITS_MATCH','VM_lm','VM_tgt','NEW_PPM','BPC_NEW_X','VM_LM_NEW_X_PERC_REV','CURRENT_PPM_FLOOR','FINAL_PPM_FLOOR','BUCKET','GOVERNANCE']][((output_df['BUCKET']=='3. INVERTIR') | (output_df['BUCKET']=='2. COMPETITIVIZAR')) & (output_df['FINAL_PPM_FLOOR'] - output_df['CURRENT_PPM_FLOOR']  > 0 )]
+
 #############################################
-output_df[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND','BPC_original','BPC_potencial','BPC_tgt','VISITS_MATCH','VM_lm','VM_tgt','NEW_PPM','BPC_NEW_X','VM_LM_NEW_X_PERC_REV','CURRENT_PPM_FLOOR','FINAL_PPM_FLOOR','BUCKET','GOVERNANCE']][(output_df['BUCKET']=='4. RENTABILIZAR A TARGET') & (output_df['FINAL_PPM_FLOOR']<output_df['CURRENT_PPM_FLOOR'])]
 
 output_df.to_excel("output.xlsx",
              sheet_name='Sheet_name_1') 
