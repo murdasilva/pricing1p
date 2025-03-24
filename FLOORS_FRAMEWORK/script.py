@@ -88,7 +88,7 @@ df_bpc['PRICE_TO_CHASE'] = np.where(df_bpc['COMP_PRICE_RIVAL'].isna(),df_bpc['PR
 df_bpc['PPM_CALCULATED_FLOOR_PRICE_ESTIMATED'] = ((df_bpc['COST']-df_bpc['CCOGS'])*df_bpc['SIT_SITE_IVA'])/(1-df_bpc['PPM_PROFIT_FLOOR']/100-df_bpc['FINANCIAL_COST']/100).fillna(0)
 
 
-df_bpc['EFFECTIVE_FLOOR_PRICE'] = df_bpc['PPM_CALCULATED_FLOOR_PRICE_ESTIMATED'].copy()
+df_bpc['EFFECTIVE_FLOOR_PRICE'] = df_bpc['PPM_CALCULATED_FLOOR_PRICE_ESTIMATED'].copy().fillna(0)
 df_bpc['EFFECTIVE_FLOOR_PRICE'][ (df_bpc['PL1P_PRICING_CURRENT_WINNING_STRATEGY'] == 'DEAL') | (df_bpc['PL1P_PRICING_CURRENT_WINNING_STRATEGY'] == 'PROMO') | (df_bpc['PL1P_PRICING_CURRENT_WINNING_STRATEGY'] == 'MARKDOWN')] = df_bpc[['PPM_CALCULATED_FLOOR_PRICE_ESTIMATED','PRICE_MELI2']].min(axis=1)
 df_bpc['PRICE_MELI_NEW'] = df_bpc[['PRICE_TO_CHASE','EFFECTIVE_FLOOR_PRICE']].values.max(1)
 df_bpc['TGMV_LC_ESTIMATED']=df_bpc['PRICE_MELI_NEW']*df_bpc['TSI']
@@ -197,34 +197,34 @@ for i in range(0,len(self_representative_agg_brands)):
 
   newdf = example.copy()
 
-  newdf['BPC_original']= sum(df_bpc_filtered['VISITS_COMPETITIVE'])/sum(df_bpc_filtered['VISITS_MATCH'])
-  newdf['BPC_estimado']= sum(df_bpc_filtered['VISITS_COMPETITIVE_ESTIMATED'])/sum(df_bpc_filtered['VISITS_MATCH'])
-  newdf['BPC_potencial']= sum(df_bpc_filtered['VISITS_COMPETITIVE_POTENTIAL'])/sum(df_bpc_filtered['VISITS_MATCH'])
+  newdf['BPC_original']= df_bpc_filtered['VISITS_COMPETITIVE'].sum()/df_bpc_filtered['VISITS_MATCH'].sum()
+  newdf['BPC_estimado']= df_bpc_filtered['VISITS_COMPETITIVE_ESTIMATED'].sum()/df_bpc_filtered['VISITS_MATCH'].sum()
+  newdf['BPC_potencial']= df_bpc_filtered['VISITS_COMPETITIVE_POTENTIAL'].sum()/df_bpc_filtered['VISITS_MATCH'].sum()
   # newdf['BPC_NEW_0']= sum(df_bpc_filtered['VISITS_COMPETITIVE_NEW_0'])/sum(df_bpc_filtered['VISITS_MATCH'])
 
   newdf['BPC_tgt']= np.mean(df_agg_brands_inputs_filtered['TARGET_PRIORIZED'])
-  newdf['VISITS_MATCH'] = sum(df_bpc_filtered['VISITS_MATCH'])
+  newdf['VISITS_MATCH'] = df_bpc_filtered['VISITS_MATCH'].sum()
 
-  newdf['VM_lm']= sum(df_agg_brands_inputs_filtered['UE_MNG_VENDOR_MARGIN_AMT_LC_LM'])/sum(df_agg_brands_inputs_filtered['UE_MNG_REVENUE_GROSS_AMT_LC_LM'])
-  newdf['VM_tgt']= sum(df_agg_brands_inputs_filtered['TGT_VENDOR_MARGIN_PERC_REV'])
+  newdf['VM_lm']= df_agg_brands_inputs_filtered['UE_MNG_VENDOR_MARGIN_AMT_LC_LM'].sum()/df_agg_brands_inputs_filtered['UE_MNG_REVENUE_GROSS_AMT_LC_LM'].sum()
+  newdf['VM_tgt']= df_agg_brands_inputs_filtered['TGT_VENDOR_MARGIN_PERC_REV'].sum()
 
-  newdf['UE_MNG_REVENUE_GROSS_AMT_LC_LM'] = sum(df_agg_brands_inputs_filtered['UE_MNG_REVENUE_GROSS_AMT_LC_LM'])
-  newdf['UE_MNG_NON_BANK_COUPONS_DISCOUNT_AMT_LC_LM'] = sum(df_agg_brands_inputs_filtered['UE_MNG_NON_BANK_COUPONS_DISCOUNT_AMT_LC_LM'])
-  newdf['UE_CON_CMV_AMT_LC_LM'] = sum(df_agg_brands_inputs_filtered['UE_CON_CMV_AMT_LC_LM'])
-  newdf['UE_MNG_OTHER_PRODUCT_COST_AMT_LC_LM'] = sum(df_agg_brands_inputs_filtered['UE_MNG_OTHER_PRODUCT_COST_AMT_LC_LM'])
-  newdf['UE_CON_CONTRACOGS_AMT_LC_LM'] = sum(df_agg_brands_inputs_filtered['UE_CON_CONTRACOGS_AMT_LC_LM'])
-
-
+  newdf['UE_MNG_REVENUE_GROSS_AMT_LC_LM'] = df_agg_brands_inputs_filtered['UE_MNG_REVENUE_GROSS_AMT_LC_LM'].sum()
+  newdf['UE_MNG_NON_BANK_COUPONS_DISCOUNT_AMT_LC_LM'] = df_agg_brands_inputs_filtered['UE_MNG_NON_BANK_COUPONS_DISCOUNT_AMT_LC_LM'].sum()
+  newdf['UE_CON_CMV_AMT_LC_LM'] = df_agg_brands_inputs_filtered['UE_CON_CMV_AMT_LC_LM'].sum()
+  newdf['UE_MNG_OTHER_PRODUCT_COST_AMT_LC_LM'] = df_agg_brands_inputs_filtered['UE_MNG_OTHER_PRODUCT_COST_AMT_LC_LM'].sum()
+  newdf['UE_CON_CONTRACOGS_AMT_LC_LM'] = df_agg_brands_inputs_filtered['UE_CON_CONTRACOGS_AMT_LC_LM'].sum()
 
 
-  newdf['VM_l6cm']= sum(df_agg_brands_inputs_filtered['UE_MNG_VENDOR_MARGIN_AMT_LC_L6CM'])/sum(df_agg_brands_inputs_filtered['UE_MNG_REVENUE_GROSS_AMT_LC_L6CM'])
-  newdf['VC_l6cm']= sum(df_agg_brands_inputs_filtered['UE_MNG_VARIABLE_CONTRIBUTION_AMT_LC_L6CM'])/sum(df_agg_brands_inputs_filtered['UE_MNG_REVENUE_GROSS_AMT_LC_L6CM'])
-  newdf['DC_l6cm']= sum(df_agg_brands_inputs_filtered['UE_MNG_DIRECT_CONTRIBUTION_AMT_LC_L6CM'])/sum(df_agg_brands_inputs_filtered['UE_MNG_REVENUE_GROSS_AMT_LC_L6CM'])
 
-  newdf['TGMV_LC']= sum(df_bpc_filtered['TGMV_LC'])
-  newdf['TGMV_LC_ESTIMATED']= sum(df_bpc_filtered['TGMV_LC_ESTIMATED'])
 
-  newdf['TSI'] = sum(df_bpc_filtered['TSI'])
+  newdf['VM_l6cm']= df_agg_brands_inputs_filtered['UE_MNG_VENDOR_MARGIN_AMT_LC_L6CM'].sum()/df_agg_brands_inputs_filtered['UE_MNG_REVENUE_GROSS_AMT_LC_L6CM'].sum()
+  newdf['VC_l6cm']= df_agg_brands_inputs_filtered['UE_MNG_VARIABLE_CONTRIBUTION_AMT_LC_L6CM'].sum()/df_agg_brands_inputs_filtered['UE_MNG_REVENUE_GROSS_AMT_LC_L6CM'].sum()
+  newdf['DC_l6cm']= df_agg_brands_inputs_filtered['UE_MNG_DIRECT_CONTRIBUTION_AMT_LC_L6CM'].sum()/df_agg_brands_inputs_filtered['UE_MNG_REVENUE_GROSS_AMT_LC_L6CM'].sum()
+
+  newdf['TGMV_LC']= df_bpc_filtered['TGMV_LC'].sum()
+  newdf['TGMV_LC_ESTIMATED']= df_bpc_filtered['TGMV_LC_ESTIMATED'].sum()
+
+  newdf['TSI'] = df_bpc_filtered['TSI'].sum()
   # newdf['TGMV_LC_NEW_0']= sum(df_bpc_filtered['TGMV_LC_NEW_0'])
 
   grid_df = pd.DataFrame()
@@ -242,15 +242,13 @@ for i in range(0,len(self_representative_agg_brands)):
     #df_bpc_filtered[['TSI','TSI_NEW_X ','B_EFECTIVO','PRICE_MELI2','PRICE_MELI_NEW_X']][df_bpc_filtered['TSI']!=df_bpc_filtered['TSI_NEW_X']]
     df_bpc_filtered['TGMV_LC_NEW_X']=df_bpc_filtered['PRICE_MELI_NEW_X']*df_bpc_filtered['TSI_NEW_X']
     df_bpc_filtered['VISITS_COMPETITIVE_NEW_X'] = np.where(df_bpc_filtered['PRICE_MELI_NEW_X'] <= 1.01*df_bpc_filtered['COMP_PRICE_RIVAL'], df_bpc_filtered['VISITS_MATCH'],0)
-    pd.Series(sum(df_bpc_filtered['VISITS_COMPETITIVE_NEW_X'])/sum(df_bpc_filtered['VISITS_MATCH']))
-    pd.Series(sum(df_bpc_filtered['TSI']))
-    pd.Series(sum(df_bpc_filtered['TSI_NEW_X']))
+
 
     new_row =  newdf.copy()
     new_row['NEW_PPM']= new_ppm
-    new_row['TGMV_LC_NEW_X'] = sum(df_bpc_filtered['TGMV_LC_NEW_X'])
-    new_row['TSI_NEW_X'] = sum(df_bpc_filtered['TSI_NEW_X'])
-    new_row['BPC_NEW_X']= sum(df_bpc_filtered['VISITS_COMPETITIVE_NEW_X'])/sum(df_bpc_filtered['VISITS_MATCH'])
+    new_row['TGMV_LC_NEW_X'] = df_bpc_filtered['TGMV_LC_NEW_X'].sum()
+    new_row['TSI_NEW_X'] = df_bpc_filtered['TSI_NEW_X'].sum()
+    new_row['BPC_NEW_X']= df_bpc_filtered['VISITS_COMPETITIVE_NEW_X'].sum()/df_bpc_filtered['VISITS_MATCH'].sum()
 
 
     new_row['UE_MNG_REVENUE_GROSS_AMT_LC_LM_NEW_X'] = new_row['UE_MNG_REVENUE_GROSS_AMT_LC_LM'] * new_row['TGMV_LC_NEW_X']/new_row['TGMV_LC_ESTIMATED']
@@ -261,7 +259,7 @@ for i in range(0,len(self_representative_agg_brands)):
     
     new_row['VM_LM_NEW_X_PERC_REV'] = (new_row['UE_MNG_REVENUE_GROSS_AMT_LC_LM_NEW_X'] + new_row['UE_MNG_NON_BANK_COUPONS_DISCOUNT_AMT_LC_LM_NEW_X'] + new_row['UE_CON_CMV_AMT_LC_LM_NEW_X'] + new_row['UE_MNG_OTHER_PRODUCT_COST_AMT_LC_LM_NEW_X'] + new_row['UE_CON_CONTRACOGS_AMT_LC_LM_NEW_X'])/(new_row['UE_MNG_REVENUE_GROSS_AMT_LC_LM_NEW_X']) 
     
-    new_row['CURRENT_PPM_FLOOR'] = round(sum(df_bpc_filtered[df_bpc_filtered['PPM_PROFIT_FLOOR'].notna()]['PPM_PROFIT_FLOOR']*df_bpc_filtered[df_bpc_filtered['PPM_PROFIT_FLOOR'].notna()]['VISITS_MATCH'])/sum(df_bpc_filtered[df_bpc_filtered['PPM_PROFIT_FLOOR'].notna()]['VISITS_MATCH']),0)
+    new_row['CURRENT_PPM_FLOOR'] = round((df_bpc_filtered[df_bpc_filtered['PPM_PROFIT_FLOOR'].notna()]['PPM_PROFIT_FLOOR']*df_bpc_filtered[df_bpc_filtered['PPM_PROFIT_FLOOR'].notna()]['VISITS_MATCH']).sum()/df_bpc_filtered[df_bpc_filtered['PPM_PROFIT_FLOOR'].notna()]['VISITS_MATCH'].sum(),0)
     
 
     grid_df = pd.concat([grid_df,new_row])
@@ -301,15 +299,15 @@ output_df['FINAL_PPM_FLOOR'][output_df['BUCKET'] == '6. REVISAR']= output_df['CU
 
 output_df['GOVERNANCE'] = np.nan
 output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'] < 0) & ((output_df['BUCKET'] == '2. COMPETITIVIZAR') |(output_df['BUCKET'] == '3. INVERTIR')  ) ]= 'C. DIRECTOR/VP'
-output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'] >= 0) & (output_df['BUCKET'] == '1. MANTENER')]= 'A. PRICING'
+output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'].notna()) & (output_df['BUCKET'] == '1. MANTENER')]= 'A. PRICING'
 output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'] >= 0) & (output_df['BUCKET'] == '2. COMPETITIVIZAR')]= 'A. PRICING'
-output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'] >= 0) & (output_df['BUCKET'] == '4. RENTABILIZAR A TARGET')]= 'A. PRICING'
-output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'] >= 0) & (output_df['BUCKET'] == '5. RENTABILIZAR PARCIALMENTE')]= 'A. PRICING'
+output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'].notna()) & (output_df['BUCKET'] == '4. RENTABILIZAR A TARGET')]= 'A. PRICING'
+output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'].notna()) & (output_df['BUCKET'] == '5. RENTABILIZAR PARCIALMENTE')]= 'A. PRICING'
 output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'] >= 0) & (output_df['BUCKET'] == '3. INVERTIR') & (output_df['VM_lm'] - output_df['VM_LM_NEW_X_PERC_REV'] <= 0.01 ) ]= 'A. PRICING'
 output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'] >= 0) & (output_df['BUCKET'] == '3. INVERTIR') & (output_df['VM_lm'] - output_df['VM_LM_NEW_X_PERC_REV'] > 0.01 ) ]= 'B. MANAGER/DIRECTOR'
 # output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'] >= 0) & (output_df['BUCKET'] == '3. INVERTIR') & (output_df['VM_lm'] - output_df['VM_LM_NEW_X_PERC_REV'] > 0.01 ) & (output_df['VM_lm'] - output_df['VM_LM_NEW_X_PERC_REV'] <= 0.05 )]= 'B. MANAGER/DIRECTOR'
 # output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'] >= 0) & (output_df['BUCKET'] == '3. INVERTIR') & (output_df['VM_lm'] - output_df['VM_LM_NEW_X_PERC_REV'] > 0.01 ) & (output_df['VM_lm'] - output_df['VM_LM_NEW_X_PERC_REV'] > 0.05 )]= 'C. DIRECTOR/VP'
-output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'] >= 0) & (output_df['BUCKET'] == '6. REVISAR')]= 'A. PRICING'
+output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'] .notna()) & (output_df['BUCKET'] == '6. REVISAR')]= 'A. PRICING'
 tsi_threshold = 1000 # Não levar a VP AGGs de baixa importância em TSI
 #output_df['GOVERNANCE'][ ((output_df['GOVERNANCE']== 'CB. MANAGER/DIRECTOR') | (output_df['GOVERNANCE']== 'C. DIRECTOR/VP')) & (output_df['TSI'] < tsi_threshold)] = 'B. MANAGER'
 
