@@ -285,6 +285,7 @@ output_df['BUCKET'][(output_df['VM_lm']<output_df['VM_tgt'])  & (output_df[['BPC
 output_df['BUCKET'][(output_df[['BPC_original','BPC_potencial']].max(axis=1)<output_df['BPC_tgt']) & (output_df['VM_LM_NEW_X_PERC_REV']>=output_df['VM_tgt']) & (output_df['BPC_NEW_X']>=output_df['BPC_tgt']) ] = '2. COMPETITIVIZAR'
 output_df['BUCKET'][(output_df[['BPC_original','BPC_potencial']].max(axis=1)<output_df['BPC_tgt']) & (output_df['VM_LM_NEW_X_PERC_REV']<output_df['VM_tgt']) & (output_df['BPC_NEW_X']>=output_df['BPC_tgt']) ] = '3. INVERTIR'
 output_df['BUCKET'][(output_df['BPC_NEW_X']<output_df['BPC_tgt']) ] = '6. REVISAR'
+output_df['BUCKET'] = output_df['BUCKET'].fillna('X. ERROR')
 
 #Adicionar coluna de piso final
 output_df['FINAL_PPM_FLOOR'] = np.nan
