@@ -311,8 +311,6 @@ output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'] >= 0) & (output_df['BUCKET
 # output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'] >= 0) & (output_df['BUCKET'] == '3. INVERTIR') & (output_df['VM_lm'] - output_df['VM_LM_NEW_X_PERC_TGMV'] > 0.01 ) & (output_df['VM_lm'] - output_df['VM_LM_NEW_X_PERC_TGMV'] <= 0.05 )]= 'B. MANAGER/DIRECTOR'
 # output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'] >= 0) & (output_df['BUCKET'] == '3. INVERTIR') & (output_df['VM_lm'] - output_df['VM_LM_NEW_X_PERC_TGMV'] > 0.01 ) & (output_df['VM_lm'] - output_df['VM_LM_NEW_X_PERC_TGMV'] > 0.05 )]= 'C. DIRECTOR/VP'
 output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'] .notna()) & (output_df['BUCKET'] == '6. REVISAR')]= 'A. PRICING'
-tsi_threshold = 1000 # Não levar a VP AGGs de baixa importância em TSI
-#output_df['GOVERNANCE'][ ((output_df['GOVERNANCE']== 'CB. MANAGER/DIRECTOR') | (output_df['GOVERNANCE']== 'C. DIRECTOR/VP')) & (output_df['TSI'] < tsi_threshold)] = 'B. MANAGER'
 
 output_df.describe()
 
@@ -333,7 +331,31 @@ output_df[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND','BPC_origi
 output_df[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND','BPC_original','BPC_potencial','BPC_tgt','VISITS_MATCH','VM_lm','VM_tgt','NEW_PPM','BPC_NEW_X','VM_LM_NEW_X_PERC_TGMV','CURRENT_PPM_FLOOR','FINAL_PPM_FLOOR','BUCKET','GOVERNANCE']][((output_df['BUCKET']=='3. INVERTIR') | (output_df['BUCKET']=='2. COMPETITIVIZAR')) & (output_df['BPC_NEW_X'] - output_df['BPC_potencial']  < 0 )]
 output_df[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND','BPC_original','BPC_potencial','BPC_tgt','VISITS_MATCH','VM_lm','VM_tgt','NEW_PPM','BPC_NEW_X','VM_LM_NEW_X_PERC_TGMV','CURRENT_PPM_FLOOR','FINAL_PPM_FLOOR','BUCKET','GOVERNANCE']][((output_df['BUCKET']=='3. INVERTIR') | (output_df['BUCKET']=='2. COMPETITIVIZAR')) & (output_df['FINAL_PPM_FLOOR'] - output_df['CURRENT_PPM_FLOOR']  > 0 )]
 
+
+
+##########################################################
+### CREATING EXECUTIVE SUMMARY                    ########
+##########################################################
+
+summary_df = output_df[['SIT_SITE_ID', 'VERTICAL', 'DOM_DOMAIN_AGG2', 'ITE_ATT_BRAND','BPC_original','BPC_potencial','BPC_tgt','VISITS_MATCH','VM_lm','VM_tgt','UE_CON_TGMV_AMT_LC_LM','TSI','TSI_NEW_X','BPC_NEW_X','UE_CON_TGMV_AMT_LC_LM_NEW_X','VM_LM_NEW_X_PERC_TGMV','CURRENT_PPM_FLOOR','FINAL_PPM_FLOOR','BUCKET','GOVERNANCE']]
+#Trazendo os valores finais para os casos onde não mudamos piso
+summary_df['FINAL_PPM_FLOOR'][(summary_df['BUCKET']=='1. MANTENER') | (summary_df['CURRENT_PPM_FLOOR']==summary_df['FINAL_PPM_FLOOR'])] = summary_df['CURRENT_PPM_FLOOR']
+summary_df['BPC_NEW_X'][(summary_df['BUCKET']=='1. MANTENER') | (summary_df['CURRENT_PPM_FLOOR']==summary_df['FINAL_PPM_FLOOR'])] = summary_df['BPC_potencial']
+summary_df['UE_CON_TGMV_AMT_LC_LM_NEW_X'][(summary_df['BUCKET']=='1. MANTENER') | (summary_df['CURRENT_PPM_FLOOR']==summary_df['FINAL_PPM_FLOOR'])] = summary_df['UE_CON_TGMV_AMT_LC_LM']
+summary_df['VM_LM_NEW_X_PERC_TGMV'][(summary_df['BUCKET']=='1. MANTENER') | (summary_df['CURRENT_PPM_FLOOR']==summary_df['FINAL_PPM_FLOOR'])] = summary_df['VM_lm']
+summary_df['VISITS_COMPETITIVE_POTENTIAL']= summary_df['BPC_potencial']*summary_df['VISITS_MATCH']
+summary_df['VISITS_COMPETITIVE_POTENTIAL_NEW']= summary_df['BPC_NEW_X']*summary_df['VISITS_MATCH']
+summary_df['UE_VM_LC']= summary_df['VM_lm']*summary_df['UE_CON_TGMV_AMT_LC_LM']
+summary_df['UE_VM_LC_NEW']= summary_df['VM_LM_NEW_X_PERC_TGMV']*summary_df['UE_CON_TGMV_AMT_LC_LM']
+summary_df['FLAG_ALL_BRANDS']= 0
+summary_df['FLAG_ALL_BRANDS'][summary_df['ITE_ATT_BRAND']=='ALL_BRANDS']= 1
+
+
+summary_df_rearranged = summary_df[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND','CURRENT_PPM_FLOOR','FINAL_PPM_FLOOR','BPC_tgt','BPC_original','BPC_potencial','BPC_NEW_X','VM_tgt','VM_lm','VM_LM_NEW_X_PERC_TGMV','UE_CON_TGMV_AMT_LC_LM','UE_CON_TGMV_AMT_LC_LM_NEW_X','BUCKET','GOVERNANCE','VISITS_MATCH','VISITS_COMPETITIVE_POTENTIAL','VISITS_COMPETITIVE_POTENTIAL_NEW','UE_VM_LC','UE_VM_LC_NEW','UE_CON_TGMV_AMT_LC_LM','UE_CON_TGMV_AMT_LC_LM_NEW_X','TSI','TSI_NEW_X','FLAG_ALL_BRANDS']]
+
 #############################################
 
-output_df.to_excel("output.xlsx",
-             sheet_name='Sheet_name_1') 
+summary_df_rearranged.to_excel("summary.xlsx",
+             sheet_name='Sheet_name_1', index=False) 
+
+
