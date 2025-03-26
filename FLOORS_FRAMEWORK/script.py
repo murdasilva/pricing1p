@@ -38,6 +38,14 @@ df_agg_brands_inputs = client.query_and_wait(query_agg_brand_inputs).to_datafram
 
 #Checking for key columns completeness
 df_bpc.describe() 
+
+bulky_mlb_mask = [
+  (df_bpc['SIT_SITE_ID']=='MLB') &
+  ((df_bpc['DOM_DOMAIN_AGG2'] == 'REFRIGERATION' ) |  (df_bpc['DOM_DOMAIN_AGG2'] == 'BUILT IN' ) |  (df_bpc['DOM_DOMAIN_AGG2'] == 'LAUNDRY & DISHWASHERS' ) |  (df_bpc['DOM_DOMAIN_AGG2'] == 'TELEVISIONS' ))
+]
+
+df_bpc = df_bpc[bulky_mlb_mask]
+
 df_bpc[df_bpc['PPM_CALCULATED_FLOOR_PRICE'].isna()]
 
 df_agg_brands_inputs.describe()
