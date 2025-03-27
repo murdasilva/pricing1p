@@ -349,7 +349,7 @@ summary_df['TSI_NEW_X'][(summary_df['BUCKET']=='1. MANTENER') | (summary_df['CUR
 summary_df['VISITS_COMPETITIVE_POTENTIAL']= summary_df['BPC_potencial']*summary_df['VISITS_MATCH']
 summary_df['VISITS_COMPETITIVE_POTENTIAL_NEW']= summary_df['BPC_NEW_X']*summary_df['VISITS_MATCH']
 summary_df['UE_VM_LC']= summary_df['VM_lm']*summary_df['UE_CON_TGMV_AMT_LC_LM']
-summary_df['UE_VM_LC_NEW']= summary_df['VM_LM_NEW_X_PERC_TGMV']*summary_df['UE_CON_TGMV_AMT_LC_LM']
+summary_df['UE_VM_LC_NEW']= summary_df['VM_LM_NEW_X_PERC_TGMV']*summary_df['UE_CON_TGMV_AMT_LC_LM_NEW_X']
 summary_df['FLAG_ALL_BRANDS']= 0
 summary_df['FLAG_ALL_BRANDS'][summary_df['ITE_ATT_BRAND']=='ALL_BRANDS']= 1
 
