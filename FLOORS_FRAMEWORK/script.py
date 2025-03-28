@@ -92,6 +92,7 @@ df_bpc['EFFECTIVE_FLOOR_PRICE'] = df_bpc['PPM_CALCULATED_FLOOR_PRICE_ESTIMATED']
 df_bpc['EFFECTIVE_FLOOR_PRICE'][ (df_bpc['PL1P_PRICING_CURRENT_WINNING_STRATEGY'] == 'DEAL') | (df_bpc['PL1P_PRICING_CURRENT_WINNING_STRATEGY'] == 'PROMO') | (df_bpc['PL1P_PRICING_CURRENT_WINNING_STRATEGY'] == 'MARKDOWN')] = df_bpc[['PPM_CALCULATED_FLOOR_PRICE_ESTIMATED','PRICE_MELI2']].min(axis=1)
 df_bpc['PRICE_MELI_NEW'] = df_bpc[['PRICE_TO_CHASE','EFFECTIVE_FLOOR_PRICE']].values.max(1)
 df_bpc['TGMV_LC_ESTIMATED']=df_bpc['PRICE_MELI_NEW']*df_bpc['TSI']
+df_bpc['VISITS_COMPETITIVE_POTENTIAL']=np.where(df_bpc[['PPM_CALCULATED_FLOOR_PRICE','PRICE_MELI_NEW']].min(axis=1)<=1.01*df_bpc['COMP_PRICE_RIVAL'],df_bpc['VISITS_MATCH'],0)
 
 ##########################################################
 ### Finding the self representative AGG/Brands ###########
@@ -156,9 +157,6 @@ self_representative_agg_brands = pd.concat(
 ### STARTING A PROOF OF CONCEPT OF THE CALCULATOR ########
 ##########################################################
 
-output_df = pd.DataFrame()
-
-
 def mask_function(df,example_df):
   if example_df['ITE_ATT_BRAND'].iloc[0] == 'ALL_BRANDS':
     mask =    ( 
@@ -176,32 +174,23 @@ def mask_function(df,example_df):
     )
   return mask
 
-for i in range(0,len(self_representative_agg_brands)):
- 
-  example = self_representative_agg_brands.iloc[[i]]
+###################################################################################
+def bpc_calculator(bpc_df, agg_brands_df, example_df, min_ppm = -10, max_ppm = 55):
+  
+  # Defining the masks
+  mask_bpc = mask_function(bpc_df,example_df)
+  mask_inputs = mask_function(agg_brands_df,example_df)
 
-          
-  mask_bpc = mask_function(df_bpc,example)
-  mask_inputs = mask_function(df_agg_brands_inputs,example)
+  #Filtering the dfs
+  df_bpc_filtered = bpc_df[ mask_bpc ]
+  df_agg_brands_inputs_filtered = agg_brands_df[ mask_inputs ]
 
+  # Calculating new columns before iterating the PPM values
 
-
-  df_bpc_filtered = df_bpc[ mask_bpc ]
-
-
-  df_bpc_filtered['VISITS_COMPETITIVE_POTENTIAL']=np.where(df_bpc_filtered[['PPM_CALCULATED_FLOOR_PRICE','PRICE_MELI2']].min(axis=1)<=1.01*df_bpc_filtered['COMP_PRICE_RIVAL'],df_bpc_filtered['VISITS_MATCH'],0)
-
-  df_agg_brands_inputs_filtered = df_agg_brands_inputs[ mask_inputs ]
-
-
-
-  newdf = example.copy()
-
+  newdf = example_df.copy()
   newdf['BPC_original']= df_bpc_filtered['VISITS_COMPETITIVE'].sum()/df_bpc_filtered['VISITS_MATCH'].sum()
   newdf['BPC_estimado']= df_bpc_filtered['VISITS_COMPETITIVE_ESTIMATED'].sum()/df_bpc_filtered['VISITS_MATCH'].sum()
   newdf['BPC_potencial']= df_bpc_filtered['VISITS_COMPETITIVE_POTENTIAL'].sum()/df_bpc_filtered['VISITS_MATCH'].sum()
-  # newdf['BPC_NEW_0']= sum(df_bpc_filtered['VISITS_COMPETITIVE_NEW_0'])/sum(df_bpc_filtered['VISITS_MATCH'])
-
   newdf['BPC_tgt']= df_agg_brands_inputs_filtered['TARGET_PRIORIZED'].mean()
   newdf['VISITS_MATCH'] = df_bpc_filtered['VISITS_MATCH'].sum()
 
@@ -215,22 +204,18 @@ for i in range(0,len(self_representative_agg_brands)):
   newdf['UE_MNG_OTHER_PRODUCT_COST_AMT_LC_LM'] = df_agg_brands_inputs_filtered['UE_MNG_OTHER_PRODUCT_COST_AMT_LC_LM'].sum()
   newdf['UE_CON_CONTRACOGS_AMT_LC_LM'] = df_agg_brands_inputs_filtered['UE_CON_CONTRACOGS_AMT_LC_LM'].sum()
 
-
-
-
-  newdf['VM_l6cm']= df_agg_brands_inputs_filtered['UE_MNG_VENDOR_MARGIN_AMT_LC_L6CM'].sum()/df_agg_brands_inputs_filtered['UE_MNG_REVENUE_GROSS_AMT_LC_L6CM'].sum()
-  newdf['VC_l6cm']= df_agg_brands_inputs_filtered['UE_MNG_VARIABLE_CONTRIBUTION_AMT_LC_L6CM'].sum()/df_agg_brands_inputs_filtered['UE_MNG_REVENUE_GROSS_AMT_LC_L6CM'].sum()
-  newdf['DC_l6cm']= df_agg_brands_inputs_filtered['UE_MNG_DIRECT_CONTRIBUTION_AMT_LC_L6CM'].sum()/df_agg_brands_inputs_filtered['UE_MNG_REVENUE_GROSS_AMT_LC_L6CM'].sum()
+  # newdf['VM_l6cm']= df_agg_brands_inputs_filtered['UE_MNG_VENDOR_MARGIN_AMT_LC_L6CM'].sum()/df_agg_brands_inputs_filtered['UE_MNG_REVENUE_GROSS_AMT_LC_L6CM'].sum()
+  # newdf['VC_l6cm']= df_agg_brands_inputs_filtered['UE_MNG_VARIABLE_CONTRIBUTION_AMT_LC_L6CM'].sum()/df_agg_brands_inputs_filtered['UE_MNG_REVENUE_GROSS_AMT_LC_L6CM'].sum()
+  # newdf['DC_l6cm']= df_agg_brands_inputs_filtered['UE_MNG_DIRECT_CONTRIBUTION_AMT_LC_L6CM'].sum()/df_agg_brands_inputs_filtered['UE_MNG_REVENUE_GROSS_AMT_LC_L6CM'].sum()
 
   newdf['TGMV_LC']= df_bpc_filtered['TGMV_LC'].sum()
   newdf['TGMV_LC_ESTIMATED']= df_bpc_filtered['TGMV_LC_ESTIMATED'].sum()
-
   newdf['TSI'] = df_bpc_filtered['TSI'].sum()
-  # newdf['TGMV_LC_NEW_0']= sum(df_bpc_filtered['TGMV_LC_NEW_0'])
 
   grid_df = pd.DataFrame()
 
-  for new_ppm in range(-10, 55 + 1):
+  # Starting the grid search by loop
+  for new_ppm in range(min_ppm, max_ppm + 1):
 
     df_bpc_filtered['PRICE_TO_CHASE_X'] = np.where(df_bpc_filtered['COMP_PRICE_RIVAL'].isna(),df_bpc_filtered['PRICE_MELI2'], df_bpc_filtered[['COMP_PRICE_RIVAL','PRICE_MELI2']].values.min(1))
     df_bpc_filtered['PPM_CALCULATED_FLOOR_PRICE_X'] = ((df_bpc['COST']-df_bpc['CCOGS'])*df_bpc['SIT_SITE_IVA'])/(1-new_ppm/100-df_bpc['FINANCIAL_COST']/100)
@@ -273,6 +258,15 @@ for i in range(0,len(self_representative_agg_brands)):
   final_df = pd.concat([ppm_that_yields_both_tgts,ppm_that_yields_bpc_tgt,ppm_min])
   final_row = final_df.iloc[[0]]
 
+  return final_row
+
+##################################################################
+output_df = pd.DataFrame()
+
+for i in range(0,len(self_representative_agg_brands)):
+ 
+  example = self_representative_agg_brands.iloc[[i]]
+  final_row = bpc_calculator(df_bpc, df_agg_brands_inputs, example, min_ppm = -10, max_ppm = 55)
   output_df = pd.concat([output_df,final_row])
 
   print(i)
