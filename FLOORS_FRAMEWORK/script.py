@@ -374,7 +374,6 @@ output_df_restricted['FLAG_TOP10_AGGBRAND'] = output_df_restricted['FLAG_TOP10_A
 
 
 # Adding new columns to output_df_restricted
-
 output_df_restricted['BUCKET']= output_df['BUCKET']
 
 #Adicionar coluna de piso final
@@ -388,7 +387,6 @@ output_df_restricted['FINAL_PPM_FLOOR'][output_df_restricted['BUCKET'] == '6. RE
 
 
 #Adicionar coluna de Governança
-output_df_restricted['FLAG_TOP10_AGGBRAND'] = output_df_restricted['FLAG_TOP10_AGGBRAND'].fillna(0)
 output_df_restricted['GOVERNANCE'] = np.nan
 output_df_restricted['GOVERNANCE'][(output_df_restricted['FINAL_PPM_FLOOR'] < 0) & ((output_df_restricted['BUCKET'] == '2. COMPETITIVIZAR') |(output_df_restricted['BUCKET'] == '3. INVERTIR')  ) ]= 'C. DIRECTOR/VP'
 output_df_restricted['GOVERNANCE'][(output_df_restricted['FINAL_PPM_FLOOR'].notna()) & (output_df_restricted['BUCKET'] == '1. MANTENER')]= 'A. PRICING'
