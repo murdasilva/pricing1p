@@ -12,7 +12,9 @@ warnings.filterwarnings('ignore')
 from google.cloud import bigquery
 client = bigquery.Client()
 
-
+import datetime
+today = datetime.date.today()
+formatted_date = today.strftime("%Y-%m-%d") 
 
 ##########################################################
 ### Importing the data                    ################
@@ -446,7 +448,9 @@ summary_df_rearranged = summary_df[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','
 
 #############################################
 #Salvando o resultado
-summary_df_rearranged.to_excel("summary.xlsx",
+
+file_name = "summary_"+formatted_date+".xlsx"
+summary_df_rearranged.to_excel(file_name,
              sheet_name='Sheet_name_1', index=False) 
 
 
