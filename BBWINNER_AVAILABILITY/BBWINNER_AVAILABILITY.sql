@@ -1,30 +1,48 @@
-WITH FINANCIAL_DATA AS (
-    SELECT
-        SITE_ID AS SIT_SITE_ID,
-        CAST(ITEM_ID AS BIGINT) AS ITE_ITEM_ID,
-        MAX(COST) AS COST,
-        AVG(SIT_SITE_IVA) AS SIT_SITE_IVA,
-        MIN(CCOGS) AS CCOGS
-    FROM (
-            SELECT
-                fpm.SITE_ID,
-                --JSON_VALUE(json_element, '$.ITEM_ID') AS MLB,
-                RIGHT(JSON_VALUE(json_element, '$.ITEM_ID'), LENGTH(JSON_VALUE(json_element, '$.ITEM_ID'))-3) as ITEM_ID,
-                JSON_VALUE(json_element, '$.ITEM_ID_STATUS') as ITEM_ID_STATUS,
-                fpm.SKU, 
-                uems.COST,
-                uems.SIT_SITE_IVA,
-                UEMS.CCOGS,
-                --uems.INSTALLMENTS,
-                --uems.FINANCIAL_COST
-            FROM 
-                `pdme000163-2xapypeu3xo-furyid.TBL.LK_PL1P_UE_MATERIAL_SUMMARIZATION` uems
-            LEFT JOIN `pdme000163-2xapypeu3xo-furyid.TBL.LK_PL1P_FP_MATERIAL` fpm
-                ON fpm.material_id = uems.material_id,
-                    UNNEST(JSON_QUERY_ARRAY(MATERIAL_ITEM_ATTR)) as json_element
-            WHERE fpm.MATERIAL_STATUS<>'deleted'
-    )
-    GROUP BY ALL
+WITH FINANCIAL_DATA AS ( 
+
+    SELECT 
+        --CAST(UPDATED_DATE AS DATE) AS TIM_DAY
+        ITEM_ID,
+        LEFT(ITEM_ID,3) AS SIT_SITE_ID,
+        CAST(RIGHT(ITEM_ID, LENGTH(ITEM_ID)-3) AS BIGINT) as ITE_ITEM_ID,
+        COST,
+        CCOGS,
+        SIT_SITE_IVA,
+        FINANCIAL_COST,
+        INSTALLMENTS,
+        PPM_PROFIT_FLOOR,
+        PPM_CALCULATED_FLOOR_PRICE,
+        UPDATED_DATE,
+        ROW_NUMBER() OVER (PARTITION BY CAST(UPDATED_DATE AS DATE) , ITEM_ID ORDER BY UPDATED_DATE DESC) AS RW,
+    FROM WHOWNER.LK_PL1P_UE_MATERIAL_SUMMARIZATION_HISTORY
+    WHERE UPDATED_DATE >= '2024-01-01'
+    QUALIFY RW = 1
+    -- SELECT
+    --     SITE_ID AS SIT_SITE_ID,
+    --     CAST(ITEM_ID AS BIGINT) AS ITE_ITEM_ID,
+    --     MAX(COST) AS COST,
+    --     AVG(SIT_SITE_IVA) AS SIT_SITE_IVA,
+    --     MIN(CCOGS) AS CCOGS
+    -- FROM (
+    --         SELECT
+    --             fpm.SITE_ID,
+    --             --JSON_VALUE(json_element, '$.ITEM_ID') AS MLB,
+    --             RIGHT(JSON_VALUE(json_element, '$.ITEM_ID'), LENGTH(JSON_VALUE(json_element, '$.ITEM_ID'))-3) as ITEM_ID,
+    --             JSON_VALUE(json_element, '$.ITEM_ID_STATUS') as ITEM_ID_STATUS,
+    --             fpm.SKU, 
+    --             uems.COST,
+    --             uems.SIT_SITE_IVA,
+    --             UEMS.CCOGS,
+    --             --uems.INSTALLMENTS,
+    --             --uems.FINANCIAL_COST
+    --         FROM 
+    --             `pdme000163-2xapypeu3xo-furyid.TBL.LK_PL1P_UE_MATERIAL_SUMMARIZATION` uems
+    --         LEFT JOIN `pdme000163-2xapypeu3xo-furyid.TBL.LK_PL1P_FP_MATERIAL` fpm
+    --             ON fpm.material_id = uems.material_id,
+    --                 UNNEST(JSON_QUERY_ARRAY(MATERIAL_ITEM_ATTR)) as json_element
+    --         WHERE fpm.MATERIAL_STATUS<>'deleted'
+    -- )
+    -- GROUP BY ALL
 )
 
 
@@ -43,6 +61,7 @@ WITH FINANCIAL_DATA AS (
         ,FD.COST
         ,FD.SIT_SITE_IVA
         ,FD.CCOGS
+        ,FD.FINANCIAL_COST
         ,ROW_NUMBER() OVER(PARTITION BY PO.SIT_SITE_ID, PO.ITE_ITEM_ID ORDER BY LAST_UPDATED_FROM_DTTM DESC) as RW
     FROM `meli-bi-data.WHOWNER.LK_PL1P_PRICING_OPPS` PO
     LEFT JOIN FINANCIAL_DATA FD ON PO.SIT_SITE_ID = FD.SIT_SITE_ID AND PO.ITE_ITEM_ID = FD.ITE_ITEM_ID
@@ -66,6 +85,7 @@ WITH FINANCIAL_DATA AS (
         ,FD.COST
         ,FD.SIT_SITE_IVA
         ,FD.CCOGS
+        ,FD.FINANCIAL_COST
         ,ROW_NUMBER() OVER(PARTITION BY PO.SIT_SITE_ID, PO.ITE_ITEM_ID ORDER BY PO.LAST_UPDATED_FROM_DTTM DESC) as RW
     FROM `meli-bi-data.WHOWNER.LK_ITE_ITEMS` IH, unnest (ITE_ITEM_RELATIONS) as R  
     LEFT JOIN `meli-bi-data.WHOWNER.LK_PL1P_PRICING_OPPS` PO ON IH.SIT_SITE_ID = PO.SIT_SITE_ID AND R.ITEM_ID = PO.ITE_ITEM_ID
@@ -95,6 +115,7 @@ WITH FINANCIAL_DATA AS (
         ,CASE WHEN IH.ITEM_ID_HERMANADO IS NOT NULL THEN IH.COST ELSE IC.COST END AS COST
         ,CASE WHEN IH.ITEM_ID_HERMANADO IS NOT NULL THEN IH.SIT_SITE_IVA ELSE IC.SIT_SITE_IVA END AS SIT_SITE_IVA
         ,CASE WHEN IH.ITEM_ID_HERMANADO IS NOT NULL THEN IH.CCOGS ELSE IC.CCOGS END AS CCOGS
+        ,CASE WHEN IH.ITEM_ID_HERMANADO IS NOT NULL THEN IH.FINANCIAL_COST ELSE IC.FINANCIAL_COST END AS FINANCIAL_COST
         ,pa.VISITAS_1P
         ,pa.VISITS_TOTALES
 
