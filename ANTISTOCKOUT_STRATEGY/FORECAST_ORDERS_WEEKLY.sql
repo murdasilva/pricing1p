@@ -23,10 +23,10 @@ WITH RAW_FORECAST AS (
 )
 
 SELECT R.SIT_SITE_ID
-  ,SK.ITE_ITEM_ID
+  ,R.ITE_ITEM_INVENTORY_ID
   ,PERIOD
   ,SUM(Q_50) AS ORDERS_FORECAST
 FROM RAW_FORECAST R
-LEFT JOIN WHOWNER.LK_PL1P_ITE_VAR_SKU SK ON R.SIT_SITE_ID = SK.SIT_SITE_ID AND R.SAP_SKU = SK.ITE_ITEM_SAP_SKU -- Pode se duplicar linhas quando um SKU esteja em mais de um item_id ; Ex: Tradicional e Catálogo
+--LEFT JOIN WHOWNER.LK_PL1P_ITE_VAR_SKU SK ON R.SIT_SITE_ID = SK.SIT_SITE_ID AND R.SAP_SKU = SK.ITE_ITEM_SAP_SKU -- Pode se duplicar linhas quando um SKU esteja em mais de um item_id ; Ex: Tradicional e Catálogo
 GROUP BY ALL
 
