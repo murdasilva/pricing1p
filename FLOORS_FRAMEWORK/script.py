@@ -273,7 +273,7 @@ def bpc_calculator(bpc_df, agg_brands_df, example_df, min_ppm = -10, max_ppm = 5
   final_df = pd.concat([ppm_that_yields_both_tgts,ppm_that_yields_bpc_tgt,ppm_min])
   final_row = final_df.iloc[[0]]
 
-  return final_row
+  return final_row , grid_df
 
 ##################################################################
 output_df = pd.DataFrame()
@@ -281,7 +281,7 @@ output_df = pd.DataFrame()
 for i in range(0,len(self_representative_agg_brands)):
  
   example = self_representative_agg_brands.iloc[[i]]
-  final_row = bpc_calculator(df_bpc, df_agg_brands_inputs, example, min_ppm = -10, max_ppm = 55)
+  final_row, grid_df = bpc_calculator(df_bpc, df_agg_brands_inputs, example, min_ppm = -10, max_ppm = 55)
   output_df = pd.concat([output_df,final_row])
   print(i)
 
