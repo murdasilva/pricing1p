@@ -277,12 +277,14 @@ def bpc_calculator(bpc_df, agg_brands_df, example_df, min_ppm = -10, max_ppm = 5
 
 ##################################################################
 output_df = pd.DataFrame()
+all_grids_df = pd.DataFrame()
 
 for i in range(0,len(self_representative_agg_brands)):
  
   example = self_representative_agg_brands.iloc[[i]]
   final_row, grid_df = bpc_calculator(df_bpc, df_agg_brands_inputs, example, min_ppm = -10, max_ppm = 55)
   output_df = pd.concat([output_df,final_row])
+  all_grids_df = pd.concat([all_grids_df,grid_df])
   print(i)
 
 
@@ -365,7 +367,7 @@ for i in range(0,len(self_representative_agg_brands)):
     restricted_ppm_floor = final_ppm_floor
 
 
-  final_row = bpc_calculator(df_bpc, df_agg_brands_inputs, example, min_ppm = restricted_ppm_floor, max_ppm = restricted_ppm_floor)
+  final_row, grid_df = bpc_calculator(df_bpc, df_agg_brands_inputs, example, min_ppm = restricted_ppm_floor, max_ppm = restricted_ppm_floor)
   output_df_restricted = pd.concat([output_df_restricted,final_row])
   print(i)
 
@@ -453,4 +455,12 @@ file_name = "summary_"+formatted_date+".xlsx"
 summary_df_rearranged.to_excel(file_name,
              sheet_name='Sheet_name_1', index=False) 
 
+# ##
+# df_ts_08 = all_grids_df[(all_grids_df['ITE_ATT_BRAND']=='ALL_BRANDS') & (all_grids_df['BPC_NEW_X']< 0.8)][['SIT_SITE_ID','DOM_DOMAIN_AGG2','ITE_ATT_BRAND','BPC_NEW_X','TSI_NEW_X','VM_LM_NEW_X_PERC_TGMV','UE_CON_TGMV_AMT_LC_LM_NEW_X']].groupby(['SIT_SITE_ID','DOM_DOMAIN_AGG2','ITE_ATT_BRAND']).first().reset_index()
+# df_ts_06 = all_grids_df[(all_grids_df['ITE_ATT_BRAND']=='ALL_BRANDS') & (all_grids_df['BPC_NEW_X']< 0.6)][['SIT_SITE_ID','DOM_DOMAIN_AGG2','ITE_ATT_BRAND','BPC_NEW_X','TSI_NEW_X','VM_LM_NEW_X_PERC_TGMV','UE_CON_TGMV_AMT_LC_LM_NEW_X']].groupby(['SIT_SITE_ID','DOM_DOMAIN_AGG2','ITE_ATT_BRAND']).first().reset_index()
 
+# df_ts = df_ts_08.merge(df_ts_06, how = 'inner', left_on = ('SIT_SITE_ID','DOM_DOMAIN_AGG2','ITE_ATT_BRAND'), right_on = ('SIT_SITE_ID','DOM_DOMAIN_AGG2','ITE_ATT_BRAND'), suffixes = ('_08','_06'))
+
+# df_ts.to_excel('output_ts_2025_bpc.xlsx',
+#              sheet_name='Sheet_name_1', index=False) 
+# ##
