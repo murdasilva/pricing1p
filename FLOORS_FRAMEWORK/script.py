@@ -190,7 +190,7 @@ def mask_function(df,example_df):
   return mask
 
 ###################################################################################
-def bpc_calculator(bpc_df, agg_brands_df, example_df, min_ppm = -10, max_ppm = 55):
+def bpc_calculator(bpc_df, agg_brands_df, example_df, min_ppm = -15, max_ppm = 55):
   
   # Defining the masks
   mask_bpc = mask_function(bpc_df,example_df)
