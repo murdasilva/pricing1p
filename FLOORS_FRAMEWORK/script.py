@@ -113,30 +113,30 @@ for site in df_bpc['SIT_SITE_ID'].unique():
   top50siteaggbrands = pd.concat([top50siteaggbrands,currenttop50keys])
 
 
-top10siteaggbrands= pd.DataFrame()
+top20siteaggbrands= pd.DataFrame()
 for site in df_bpc['SIT_SITE_ID'].unique():
   df_tgmv = df_bpc[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND','TGMV_LC','VISITS_MATCH']][df_bpc['SIT_SITE_ID']==site].groupby(['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND']).sum().reset_index()
-  currenttop10keys = df_tgmv.sort_values('TGMV_LC', ascending = False).head(10)
-  currenttop10keys = currenttop10keys.merge(df_vm, how = 'left', left_on = ('SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND' ),right_on = ('SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND' ) )
-  currenttop10keys=currenttop10keys[currenttop10keys['VISITS_MATCH']>0]
-  currenttop10keys = currenttop10keys[currenttop10keys['UE_CON_TGMV_AMT_LC_L6CM'] > 0]
-  currenttop10keys = currenttop10keys[currenttop10keys['UE_CON_TGMV_AMT_LC_LM'] > 0]
-  top10siteaggbrands = pd.concat([top10siteaggbrands,currenttop10keys])
+  currenttop20keys = df_tgmv.sort_values('TGMV_LC', ascending = False).head(10)
+  currenttop20keys = currenttop20keys.merge(df_vm, how = 'left', left_on = ('SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND' ),right_on = ('SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND' ) )
+  currenttop20keys=currenttop20keys[currenttop20keys['VISITS_MATCH']>0]
+  currenttop20keys = currenttop20keys[currenttop20keys['UE_CON_TGMV_AMT_LC_L6CM'] > 0]
+  currenttop20keys = currenttop20keys[currenttop20keys['UE_CON_TGMV_AMT_LC_LM'] > 0]
+  top20siteaggbrands = pd.concat([top20siteaggbrands,currenttop20keys])
 
-top10siteaggbrands = top10siteaggbrands[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND']]
-top10siteaggbrands['FLAG_TOP10_AGGBRAND'] = 1
+top20siteaggbrands = top20siteaggbrands[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND']]
+top20siteaggbrands['FLAG_top20_AGGBRAND'] = 1
 
-top10verticalsaggbrands= pd.DataFrame()
+top20verticalsaggbrands= pd.DataFrame()
 
 for site in df_bpc['SIT_SITE_ID'].unique():
     for vertical in df_bpc['VERTICAL'].unique():
         df_tgmv = df_bpc[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND','TGMV_LC','VISITS_MATCH']][(df_bpc['SIT_SITE_ID']==site) & (df_bpc['VERTICAL']==vertical)].groupby(['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND']).sum().reset_index()
-        currenttop10keys = df_tgmv.sort_values('TGMV_LC', ascending = False).head(10)
-        currenttop10keys = currenttop10keys.merge(df_vm, how = 'left', left_on = ('SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND' ),right_on = ('SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND' ) )
-        currenttop10keys=currenttop10keys[currenttop10keys['VISITS_MATCH']>0]
-        currenttop10keys = currenttop10keys[currenttop10keys['UE_CON_TGMV_AMT_LC_L6CM'] > 0]
-        currenttop10keys = currenttop10keys[currenttop10keys['UE_CON_TGMV_AMT_LC_LM'] > 0]
-        top10verticalsaggbrands = pd.concat([top10verticalsaggbrands,currenttop10keys])
+        currenttop20keys = df_tgmv.sort_values('TGMV_LC', ascending = False).head(10)
+        currenttop20keys = currenttop20keys.merge(df_vm, how = 'left', left_on = ('SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND' ),right_on = ('SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND' ) )
+        currenttop20keys=currenttop20keys[currenttop20keys['VISITS_MATCH']>0]
+        currenttop20keys = currenttop20keys[currenttop20keys['UE_CON_TGMV_AMT_LC_L6CM'] > 0]
+        currenttop20keys = currenttop20keys[currenttop20keys['UE_CON_TGMV_AMT_LC_LM'] > 0]
+        top20verticalsaggbrands = pd.concat([top20verticalsaggbrands,currenttop20keys])
 
 
 
@@ -163,7 +163,7 @@ aggkeys['ITE_ATT_BRAND'] = 'ALL_BRANDS'
 self_representative_agg_brands = pd.concat(
    [
       top50siteaggbrands[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND']]
-      ,top10verticalsaggbrands[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND']]
+      ,top20verticalsaggbrands[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND']]
       ,aggkeys[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND']]
     ]).drop_duplicates().sort_values(by = ['SIT_SITE_ID','VERTICAL']).reset_index(drop=True)
 
@@ -227,6 +227,7 @@ def bpc_calculator(bpc_df, agg_brands_df, example_df, min_ppm = -15, max_ppm = 5
   newdf['TGMV_LC']= df_bpc_filtered['TGMV_LC'].sum()
   newdf['TGMV_LC_ESTIMATED']= df_bpc_filtered['TGMV_LC_ESTIMATED'].sum()
   newdf['TSI'] = df_bpc_filtered['TSI'].sum()
+  newdf['DC_PERC_L6M']= df_agg_brands_inputs_filtered['UE_MNG_DIRECT_CONTRIBUITION_ADJ_AMT_LC_L6CM'].sum()/df_agg_brands_inputs_filtered['UE_CON_TGMV_AMT_LC_L6CM'].sum()
 
   grid_df = pd.DataFrame()
 
@@ -310,25 +311,25 @@ output_df['FINAL_PPM_FLOOR'][output_df['BUCKET'] == '3. INVERTIR']= output_df[['
 output_df['FINAL_PPM_FLOOR'][output_df['BUCKET'] == '6. REVISAR']= output_df['CURRENT_PPM_FLOOR']
 
 #Adicionar Flag de Top 10
-output_df = output_df.merge(top10siteaggbrands, how = 'left', left_on = ('SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND'), right_on = ('SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND'))
-output_df['FLAG_TOP10_AGGBRAND'] = output_df['FLAG_TOP10_AGGBRAND'].fillna(0)
+output_df = output_df.merge(top20siteaggbrands, how = 'left', left_on = ('SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND'), right_on = ('SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND'))
+output_df['FLAG_top20_AGGBRAND'] = output_df['FLAG_top20_AGGBRAND'].fillna(0)
 
 #Adicionar coluna de Governança
 output_df['GOVERNANCE'] = np.nan
-output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'] < 0) & ((output_df['BUCKET'] == '2. COMPETITIVIZAR') |(output_df['BUCKET'] == '3. INVERTIR')  ) ]= 'C. DIRECTOR/VP'
-output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'].notna()) & (output_df['BUCKET'] == '1. MANTENER')]= 'A. PRICING'
-output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'] >= 0) & (output_df['BUCKET'] == '2. COMPETITIVIZAR')& (output_df['FLAG_TOP10_AGGBRAND'] == 0)]= 'A. PRICING'
-output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'] >= 0) & (output_df['BUCKET'] == '2. COMPETITIVIZAR')& (output_df['FLAG_TOP10_AGGBRAND'] == 1)]= 'B. MANAGER/DIRECTOR'
-output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'].notna()) & (output_df['BUCKET'] == '4. RENTABILIZAR A TARGET')& (output_df['FLAG_TOP10_AGGBRAND'] == 0)]= 'A. PRICING'
-output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'].notna()) & (output_df['BUCKET'] == '4. RENTABILIZAR A TARGET')& (output_df['FLAG_TOP10_AGGBRAND'] == 1)]= 'B. MANAGER/DIRECTOR'
-output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'].notna()) & (output_df['BUCKET'] == '5. RENTABILIZAR PARCIALMENTE') & (output_df['FLAG_TOP10_AGGBRAND'] == 0)]= 'A. PRICING'
-output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'].notna()) & (output_df['BUCKET'] == '5. RENTABILIZAR PARCIALMENTE') & (output_df['FLAG_TOP10_AGGBRAND'] == 1)]= 'B. MANAGER/DIRECTOR'
-output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'] >= 0) & (output_df['BUCKET'] == '3. INVERTIR') & (output_df['VM_lm'] - output_df['VM_LM_NEW_X_PERC_TGMV'] <= 0.01 ) & (output_df['FLAG_TOP10_AGGBRAND'] == 0  )]= 'A. PRICING'
-output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'] >= 0) & (output_df['BUCKET'] == '3. INVERTIR') & (output_df['VM_lm'] - output_df['VM_LM_NEW_X_PERC_TGMV'] <= 0.01 ) & (output_df['FLAG_TOP10_AGGBRAND'] == 1  )]= 'B. MANAGER/DIRECTOR'
-output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'] >= 0) & (output_df['BUCKET'] == '3. INVERTIR') & (output_df['VM_lm'] - output_df['VM_LM_NEW_X_PERC_TGMV'] > 0.01 ) ]= 'B. MANAGER/DIRECTOR'
-# output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'] >= 0) & (output_df['BUCKET'] == '3. INVERTIR') & (output_df['VM_lm'] - output_df['VM_LM_NEW_X_PERC_TGMV'] > 0.01 ) & (output_df['VM_lm'] - output_df['VM_LM_NEW_X_PERC_TGMV'] <= 0.05 )]= 'B. MANAGER/DIRECTOR'
-# output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'] >= 0) & (output_df['BUCKET'] == '3. INVERTIR') & (output_df['VM_lm'] - output_df['VM_LM_NEW_X_PERC_TGMV'] > 0.01 ) & (output_df['VM_lm'] - output_df['VM_LM_NEW_X_PERC_TGMV'] > 0.05 )]= 'C. DIRECTOR/VP'
-output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'] .notna()) & (output_df['BUCKET'] == '6. REVISAR')]= 'A. PRICING'
+output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'].notna()) & (output_df['BUCKET'] == '1. MANTENER') ]= 'A. PRICING'
+output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'].notna()) & (output_df['BUCKET'] == '4. RENTABILIZAR A TARGET') & (output_df['FLAG_top20_AGGBRAND'] == 0)]= 'A. PRICING'
+output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'].notna()) & (output_df['BUCKET'] == '4. RENTABILIZAR A TARGET') & (output_df['FLAG_top20_AGGBRAND'] == 1)]= 'B. MANAGER/DIRECTOR'
+output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'].notna()) & (output_df['BUCKET'] == '5. RENTABILIZAR PARCIALMENTE')& (output_df['FLAG_top20_AGGBRAND'] == 0)]= 'A. PRICING'
+output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'].notna()) & (output_df['BUCKET'] == '5. RENTABILIZAR PARCIALMENTE')& (output_df['FLAG_top20_AGGBRAND'] == 1)]= 'B. MANAGER/DIRECTOR'
+output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'].notna()) & (output_df['BUCKET'] == '6. REVISAR')]= 'A. PRICING'
+output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR']>=0) & (output_df['BUCKET'] == '2. COMPETITIVIZAR') & (output_df['FLAG_top20_AGGBRAND'] == 0)]= 'A. PRICING'
+output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR']>=0) & (output_df['BUCKET'] == '2. COMPETITIVIZAR') & (output_df['FLAG_top20_AGGBRAND'] == 1) & (output_df['VM_lm'] - output_df['VM_LM_NEW_X_PERC_TGMV'] <= output_df['DC_PERC_L6M'] )]= 'A. PRICING'
+output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR']>=0) & (output_df['BUCKET'] == '3. INVERTIR') & (output_df['FLAG_top20_AGGBRAND'] == 0)]= 'A. PRICING'
+output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR']>=0) & (output_df['BUCKET'] == '3. INVERTIR') & (output_df['FLAG_top20_AGGBRAND'] == 1) & (output_df['VM_lm'] - output_df['VM_LM_NEW_X_PERC_TGMV'] <= output_df['DC_PERC_L6M'] )]= 'A. PRICING'
+output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR']>=0) & (output_df['BUCKET'] == '2. COMPETITIVIZAR') & (output_df['FLAG_top20_AGGBRAND'] == 1) & (output_df['VM_lm'] - output_df['VM_LM_NEW_X_PERC_TGMV'] > output_df['DC_PERC_L6M'] )]= 'B. MANAGER/DIRECTOR'
+output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR']>=0) & (output_df['BUCKET'] == '3. INVERTIR') & (output_df['FLAG_top20_AGGBRAND'] == 1) & (output_df['VM_lm'] - output_df['VM_LM_NEW_X_PERC_TGMV'] > output_df['DC_PERC_L6M'] )]= 'B. MANAGER/DIRECTOR'
+output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR']<0) & (output_df['BUCKET'] == '2. COMPETITIVIZAR') ]= 'C. DIRECTOR/VP'
+output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR']<0) & (output_df['BUCKET'] == '3. INVERTIR')]= 'C. DIRECTOR/VP'
 
 output_df.describe()
 
@@ -373,9 +374,9 @@ for i in range(0,len(self_representative_agg_brands)):
   print(i)
 
 
-#Adicionar Flag de Top 10
-output_df_restricted = output_df_restricted.merge(top10siteaggbrands, how = 'left', left_on = ('SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND'), right_on = ('SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND'))
-output_df_restricted['FLAG_TOP10_AGGBRAND'] = output_df_restricted['FLAG_TOP10_AGGBRAND'].fillna(0)
+#Adicionar Flag de Top 20
+output_df_restricted = output_df_restricted.merge(top20siteaggbrands, how = 'left', left_on = ('SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND'), right_on = ('SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND'))
+output_df_restricted['FLAG_top20_AGGBRAND'] = output_df_restricted['FLAG_top20_AGGBRAND'].fillna(0)
 
 
 # Adding new columns to output_df_restricted
@@ -393,21 +394,20 @@ output_df_restricted['FINAL_PPM_FLOOR'][output_df_restricted['BUCKET'] == '6. RE
 
 #Adicionar coluna de Governança
 output_df_restricted['GOVERNANCE'] = np.nan
-output_df_restricted['GOVERNANCE'][(output_df_restricted['FINAL_PPM_FLOOR'] < 0) & ((output_df_restricted['BUCKET'] == '2. COMPETITIVIZAR') |(output_df_restricted['BUCKET'] == '3. INVERTIR')  ) ]= 'C. DIRECTOR/VP'
-output_df_restricted['GOVERNANCE'][(output_df_restricted['FINAL_PPM_FLOOR'].notna()) & (output_df_restricted['BUCKET'] == '1. MANTENER')]= 'A. PRICING'
-output_df_restricted['GOVERNANCE'][(output_df_restricted['FINAL_PPM_FLOOR'] >= 0) & (output_df_restricted['BUCKET'] == '2. COMPETITIVIZAR')& (output_df_restricted['FLAG_TOP10_AGGBRAND'] == 0)]= 'A. PRICING'
-output_df_restricted['GOVERNANCE'][(output_df_restricted['FINAL_PPM_FLOOR'] >= 0) & (output_df_restricted['BUCKET'] == '2. COMPETITIVIZAR')& (output_df_restricted['FLAG_TOP10_AGGBRAND'] == 1)]= 'B. MANAGER/DIRECTOR'
-output_df_restricted['GOVERNANCE'][(output_df_restricted['FINAL_PPM_FLOOR'].notna()) & (output_df_restricted['BUCKET'] == '4. RENTABILIZAR A TARGET')& (output_df_restricted['FLAG_TOP10_AGGBRAND'] == 0)]= 'A. PRICING'
-output_df_restricted['GOVERNANCE'][(output_df_restricted['FINAL_PPM_FLOOR'].notna()) & (output_df_restricted['BUCKET'] == '4. RENTABILIZAR A TARGET')& (output_df_restricted['FLAG_TOP10_AGGBRAND'] == 1)]= 'B. MANAGER/DIRECTOR'
-output_df_restricted['GOVERNANCE'][(output_df_restricted['FINAL_PPM_FLOOR'].notna()) & (output_df_restricted['BUCKET'] == '5. RENTABILIZAR PARCIALMENTE') & (output_df_restricted['FLAG_TOP10_AGGBRAND'] == 0)]= 'A. PRICING'
-output_df_restricted['GOVERNANCE'][(output_df_restricted['FINAL_PPM_FLOOR'].notna()) & (output_df_restricted['BUCKET'] == '5. RENTABILIZAR PARCIALMENTE') & (output_df_restricted['FLAG_TOP10_AGGBRAND'] == 1)]= 'B. MANAGER/DIRECTOR'
-output_df_restricted['GOVERNANCE'][(output_df_restricted['FINAL_PPM_FLOOR'] >= 0) & (output_df_restricted['BUCKET'] == '3. INVERTIR') & (output_df_restricted['VM_lm'] - output_df_restricted['VM_LM_NEW_X_PERC_TGMV'] <= 0.01 ) & (output_df_restricted['FLAG_TOP10_AGGBRAND'] == 0  )]= 'A. PRICING'
-output_df_restricted['GOVERNANCE'][(output_df_restricted['FINAL_PPM_FLOOR'] >= 0) & (output_df_restricted['BUCKET'] == '3. INVERTIR') & (output_df_restricted['VM_lm'] - output_df_restricted['VM_LM_NEW_X_PERC_TGMV'] <= 0.01 ) & (output_df_restricted['FLAG_TOP10_AGGBRAND'] == 1  )]= 'B. MANAGER/DIRECTOR'
-output_df_restricted['GOVERNANCE'][(output_df_restricted['FINAL_PPM_FLOOR'] >= 0) & (output_df_restricted['BUCKET'] == '3. INVERTIR') & (output_df_restricted['VM_lm'] - output_df_restricted['VM_LM_NEW_X_PERC_TGMV'] > 0.01 ) ]= 'B. MANAGER/DIRECTOR'
-# output_df_restricted['GOVERNANCE'][(output_df_restricted['FINAL_PPM_FLOOR'] >= 0) & (output_df_restricted['BUCKET'] == '3. INVERTIR') & (output_df_restricted['VM_lm'] - output_df_restricted['VM_LM_NEW_X_PERC_TGMV'] > 0.01 ) & (output_df_restricted['VM_lm'] - output_df_restricted['VM_LM_NEW_X_PERC_TGMV'] <= 0.05 )]= 'B. MANAGER/DIRECTOR'
-# output_df_restricted['GOVERNANCE'][(output_df_restricted['FINAL_PPM_FLOOR'] >= 0) & (output_df_restricted['BUCKET'] == '3. INVERTIR') & (output_df_restricted['VM_lm'] - output_df_restricted['VM_LM_NEW_X_PERC_TGMV'] > 0.01 ) & (output_df_restricted['VM_lm'] - output_df_restricted['VM_LM_NEW_X_PERC_TGMV'] > 0.05 )]= 'C. DIRECTOR/VP'
-output_df_restricted['GOVERNANCE'][(output_df_restricted['FINAL_PPM_FLOOR'] .notna()) & (output_df_restricted['BUCKET'] == '6. REVISAR')]= 'A. PRICING'
-
+output_df_restricted['GOVERNANCE'][(output_df_restricted['FINAL_PPM_FLOOR'].notna()) & (output_df_restricted['BUCKET'] == '1. MANTENER') ]= 'A. PRICING'
+output_df_restricted['GOVERNANCE'][(output_df_restricted['FINAL_PPM_FLOOR'].notna()) & (output_df_restricted['BUCKET'] == '4. RENTABILIZAR A TARGET') & (output_df_restricted['FLAG_top20_AGGBRAND'] == 0)]= 'A. PRICING'
+output_df_restricted['GOVERNANCE'][(output_df_restricted['FINAL_PPM_FLOOR'].notna()) & (output_df_restricted['BUCKET'] == '4. RENTABILIZAR A TARGET') & (output_df_restricted['FLAG_top20_AGGBRAND'] == 1)]= 'B. MANAGER/DIRECTOR'
+output_df_restricted['GOVERNANCE'][(output_df_restricted['FINAL_PPM_FLOOR'].notna()) & (output_df_restricted['BUCKET'] == '5. RENTABILIZAR PARCIALMENTE')& (output_df_restricted['FLAG_top20_AGGBRAND'] == 0)]= 'A. PRICING'
+output_df_restricted['GOVERNANCE'][(output_df_restricted['FINAL_PPM_FLOOR'].notna()) & (output_df_restricted['BUCKET'] == '5. RENTABILIZAR PARCIALMENTE')& (output_df_restricted['FLAG_top20_AGGBRAND'] == 1)]= 'B. MANAGER/DIRECTOR'
+output_df_restricted['GOVERNANCE'][(output_df_restricted['FINAL_PPM_FLOOR'].notna()) & (output_df_restricted['BUCKET'] == '6. REVISAR')]= 'A. PRICING'
+output_df_restricted['GOVERNANCE'][(output_df_restricted['FINAL_PPM_FLOOR']>=0) & (output_df_restricted['BUCKET'] == '2. COMPETITIVIZAR') & (output_df_restricted['FLAG_top20_AGGBRAND'] == 0)]= 'A. PRICING'
+output_df_restricted['GOVERNANCE'][(output_df_restricted['FINAL_PPM_FLOOR']>=0) & (output_df_restricted['BUCKET'] == '2. COMPETITIVIZAR') & (output_df_restricted['FLAG_top20_AGGBRAND'] == 1) & (output_df['VM_lm'] - output_df['VM_LM_NEW_X_PERC_TGMV'] <= output_df['DC_PERC_L6M'] )]= 'A. PRICING'
+output_df_restricted['GOVERNANCE'][(output_df_restricted['FINAL_PPM_FLOOR']>=0) & (output_df_restricted['BUCKET'] == '3. INVERTIR') & (output_df_restricted['FLAG_top20_AGGBRAND'] == 0)]= 'A. PRICING'
+output_df_restricted['GOVERNANCE'][(output_df_restricted['FINAL_PPM_FLOOR']>=0) & (output_df_restricted['BUCKET'] == '3. INVERTIR') & (output_df_restricted['FLAG_top20_AGGBRAND'] == 1) & (output_df['VM_lm'] - output_df['VM_LM_NEW_X_PERC_TGMV'] <= output_df['DC_PERC_L6M'] )]= 'A. PRICING'
+output_df_restricted['GOVERNANCE'][(output_df_restricted['FINAL_PPM_FLOOR']>=0) & (output_df_restricted['BUCKET'] == '2. COMPETITIVIZAR') & (output_df_restricted['FLAG_top20_AGGBRAND'] == 1) & (output_df['VM_lm'] - output_df['VM_LM_NEW_X_PERC_TGMV'] > output_df['DC_PERC_L6M'] )]= 'B. MANAGER/DIRECTOR'
+output_df_restricted['GOVERNANCE'][(output_df_restricted['FINAL_PPM_FLOOR']>=0) & (output_df_restricted['BUCKET'] == '3. INVERTIR') & (output_df_restricted['FLAG_top20_AGGBRAND'] == 1) & (output_df['VM_lm'] - output_df['VM_LM_NEW_X_PERC_TGMV'] > output_df['DC_PERC_L6M'] )]= 'B. MANAGER/DIRECTOR'
+output_df_restricted['GOVERNANCE'][(output_df_restricted['FINAL_PPM_FLOOR']<0) & (output_df_restricted['BUCKET'] == '2. COMPETITIVIZAR') ]= 'C. DIRECTOR/VP'
+output_df_restricted['GOVERNANCE'][(output_df_restricted['FINAL_PPM_FLOOR']<0) & (output_df_restricted['BUCKET'] == '3. INVERTIR')]= 'C. DIRECTOR/VP'
 
 pd.crosstab(output_df_restricted['BUCKET'][output_df_restricted['ITE_ATT_BRAND']!='ALL_BRANDS'],output_df_restricted['GOVERNANCE'],margins = True)
 
@@ -417,7 +417,7 @@ pd.crosstab(output_df_restricted['BUCKET'][output_df_restricted['ITE_ATT_BRAND']
 ### CREATING EXECUTIVE SUMMARY                    ########
 ##########################################################
 
-summary_df = output_df[['SIT_SITE_ID', 'VERTICAL', 'DOM_DOMAIN_AGG2', 'ITE_ATT_BRAND','BPC_original','BPC_ABC_original','BPC_potencial','BPC_tgt','VISITS_MATCH','VM_lm','VM_tgt','UE_CON_TGMV_AMT_LC_LM','TSI','TSI_NEW_X','BPC_NEW_X','UE_CON_TGMV_AMT_LC_LM_NEW_X','VM_LM_NEW_X_PERC_TGMV','CURRENT_PPM_FLOOR','FINAL_PPM_FLOOR','BUCKET','GOVERNANCE']]
+summary_df = output_df[['SIT_SITE_ID', 'VERTICAL', 'DOM_DOMAIN_AGG2', 'ITE_ATT_BRAND','BPC_original','BPC_ABC_original','BPC_potencial','BPC_tgt','VISITS_MATCH','VM_lm','VM_tgt','UE_CON_TGMV_AMT_LC_LM','TSI','TSI_NEW_X','BPC_NEW_X','UE_CON_TGMV_AMT_LC_LM_NEW_X','VM_LM_NEW_X_PERC_TGMV','CURRENT_PPM_FLOOR','FINAL_PPM_FLOOR','BUCKET','GOVERNANCE','DC_PERC_L6M']]
 
 #Substituindo as colunas pós mudanças por sua versão restrita
 summary_df['OPTIMAL_PPM_FLOOR']= summary_df['FINAL_PPM_FLOOR']
@@ -446,7 +446,7 @@ summary_df['FLAG_ALL_BRANDS']= 0
 summary_df['FLAG_ALL_BRANDS'][summary_df['ITE_ATT_BRAND']=='ALL_BRANDS']= 1
 
 #Reordenando as colunas para facilitar a análise a posteriori
-summary_df_rearranged = summary_df[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND','CURRENT_PPM_FLOOR','OPTIMAL_PPM_FLOOR','FINAL_PPM_FLOOR','BPC_tgt','BPC_original','BPC_ABC_original','BPC_potencial','BPC_NEW_X','VM_tgt','VM_lm','VM_LM_NEW_X_PERC_TGMV','UE_CON_TGMV_AMT_LC_LM','UE_CON_TGMV_AMT_LC_LM_NEW_X','BUCKET','GOVERNANCE','VISITS_MATCH','VISITS_COMPETITIVE_POTENTIAL','VISITS_COMPETITIVE_POTENTIAL_NEW','UE_VM_LC','UE_VM_LC_NEW','UE_CON_TGMV_AMT_LC_LM','UE_CON_TGMV_AMT_LC_LM_NEW_X','TSI','TSI_NEW_X','FLAG_ALL_BRANDS']]
+summary_df_rearranged = summary_df[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND','CURRENT_PPM_FLOOR','OPTIMAL_PPM_FLOOR','FINAL_PPM_FLOOR','BPC_tgt','BPC_original','BPC_ABC_original','BPC_potencial','BPC_NEW_X','VM_tgt','VM_lm','VM_LM_NEW_X_PERC_TGMV','UE_CON_TGMV_AMT_LC_LM','UE_CON_TGMV_AMT_LC_LM_NEW_X','BUCKET','GOVERNANCE','VISITS_MATCH','VISITS_COMPETITIVE_POTENTIAL','VISITS_COMPETITIVE_POTENTIAL_NEW','UE_VM_LC','UE_VM_LC_NEW','UE_CON_TGMV_AMT_LC_LM','UE_CON_TGMV_AMT_LC_LM_NEW_X','TSI','TSI_NEW_X','FLAG_ALL_BRANDS','DC_PERC_L6M']]
 
 #Alterando a coluna de Brands
 summary_df['ITE_ATT_BRAND'][summary_df['ITE_ATT_BRAND']=='ALL_BRANDS'] = 'OTHER_BRANDS'
