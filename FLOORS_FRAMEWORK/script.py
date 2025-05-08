@@ -204,6 +204,7 @@ def bpc_calculator(bpc_df, agg_brands_df, example_df, min_ppm = -15, max_ppm = 5
 
   newdf = example_df.copy()
   newdf['BPC_original']= df_bpc_filtered['VISITS_COMPETITIVE'].sum()/df_bpc_filtered['VISITS_MATCH'].sum()
+  newdf['BPC_ABC_original']= df_agg_brands_inputs_filtered['VISITS_COMPETITIVE_ABC'].sum()/df_agg_brands_inputs_filtered['VISITS_MATCH_ABC'].sum()
   newdf['BPC_estimado']= df_bpc_filtered['VISITS_COMPETITIVE_ESTIMATED'].sum()/df_bpc_filtered['VISITS_MATCH'].sum()
   newdf['BPC_potencial']= df_bpc_filtered['VISITS_COMPETITIVE_POTENTIAL'].sum()/df_bpc_filtered['VISITS_MATCH'].sum()
   newdf['BPC_tgt']= df_agg_brands_inputs_filtered['TARGET_PRIORIZED'].mean()
@@ -416,7 +417,7 @@ pd.crosstab(output_df_restricted['BUCKET'][output_df_restricted['ITE_ATT_BRAND']
 ### CREATING EXECUTIVE SUMMARY                    ########
 ##########################################################
 
-summary_df = output_df[['SIT_SITE_ID', 'VERTICAL', 'DOM_DOMAIN_AGG2', 'ITE_ATT_BRAND','BPC_original','BPC_potencial','BPC_tgt','VISITS_MATCH','VM_lm','VM_tgt','UE_CON_TGMV_AMT_LC_LM','TSI','TSI_NEW_X','BPC_NEW_X','UE_CON_TGMV_AMT_LC_LM_NEW_X','VM_LM_NEW_X_PERC_TGMV','CURRENT_PPM_FLOOR','FINAL_PPM_FLOOR','BUCKET','GOVERNANCE']]
+summary_df = output_df[['SIT_SITE_ID', 'VERTICAL', 'DOM_DOMAIN_AGG2', 'ITE_ATT_BRAND','BPC_original','BPC_ABC_original','BPC_potencial','BPC_tgt','VISITS_MATCH','VM_lm','VM_tgt','UE_CON_TGMV_AMT_LC_LM','TSI','TSI_NEW_X','BPC_NEW_X','UE_CON_TGMV_AMT_LC_LM_NEW_X','VM_LM_NEW_X_PERC_TGMV','CURRENT_PPM_FLOOR','FINAL_PPM_FLOOR','BUCKET','GOVERNANCE']]
 
 #Substituindo as colunas pós mudanças por sua versão restrita
 summary_df['OPTIMAL_PPM_FLOOR']= summary_df['FINAL_PPM_FLOOR']
@@ -445,7 +446,10 @@ summary_df['FLAG_ALL_BRANDS']= 0
 summary_df['FLAG_ALL_BRANDS'][summary_df['ITE_ATT_BRAND']=='ALL_BRANDS']= 1
 
 #Reordenando as colunas para facilitar a análise a posteriori
-summary_df_rearranged = summary_df[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND','CURRENT_PPM_FLOOR','OPTIMAL_PPM_FLOOR','FINAL_PPM_FLOOR','BPC_tgt','BPC_original','BPC_potencial','BPC_NEW_X','VM_tgt','VM_lm','VM_LM_NEW_X_PERC_TGMV','UE_CON_TGMV_AMT_LC_LM','UE_CON_TGMV_AMT_LC_LM_NEW_X','BUCKET','GOVERNANCE','VISITS_MATCH','VISITS_COMPETITIVE_POTENTIAL','VISITS_COMPETITIVE_POTENTIAL_NEW','UE_VM_LC','UE_VM_LC_NEW','UE_CON_TGMV_AMT_LC_LM','UE_CON_TGMV_AMT_LC_LM_NEW_X','TSI','TSI_NEW_X','FLAG_ALL_BRANDS']]
+summary_df_rearranged = summary_df[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND','CURRENT_PPM_FLOOR','OPTIMAL_PPM_FLOOR','FINAL_PPM_FLOOR','BPC_tgt','BPC_original','BPC_ABC_original','BPC_potencial','BPC_NEW_X','VM_tgt','VM_lm','VM_LM_NEW_X_PERC_TGMV','UE_CON_TGMV_AMT_LC_LM','UE_CON_TGMV_AMT_LC_LM_NEW_X','BUCKET','GOVERNANCE','VISITS_MATCH','VISITS_COMPETITIVE_POTENTIAL','VISITS_COMPETITIVE_POTENTIAL_NEW','UE_VM_LC','UE_VM_LC_NEW','UE_CON_TGMV_AMT_LC_LM','UE_CON_TGMV_AMT_LC_LM_NEW_X','TSI','TSI_NEW_X','FLAG_ALL_BRANDS']]
+
+#Alterando a coluna de Brands
+summary_df['ITE_ATT_BRAND'][summary_df['ITE_ATT_BRAND']=='ALL_BRANDS'] = 'OTHER_BRANDS'
 
 
 #############################################
