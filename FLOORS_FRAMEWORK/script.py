@@ -315,7 +315,7 @@ output_df = output_df.merge(top20siteaggbrands, how = 'left', left_on = ('SIT_SI
 output_df['FLAG_top20_AGGBRAND'] = output_df['FLAG_top20_AGGBRAND'].fillna(0)
 
 #Adicionar coluna de Governança
-output_df['GOVERNANCE'] = np.nan
+output_df['GOVERNANCE'] = 'ERROR'
 output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'].notna()) & (output_df['BUCKET'] == '1. MANTENER') ]= 'A. PRICING'
 output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'].notna()) & (output_df['BUCKET'] == '4. RENTABILIZAR A TARGET') & (output_df['FLAG_top20_AGGBRAND'] == 0)]= 'A. PRICING'
 output_df['GOVERNANCE'][(output_df['FINAL_PPM_FLOOR'].notna()) & (output_df['BUCKET'] == '4. RENTABILIZAR A TARGET') & (output_df['FLAG_top20_AGGBRAND'] == 1)]= 'B. MANAGER/DIRECTOR'
@@ -393,7 +393,7 @@ output_df_restricted['FINAL_PPM_FLOOR'][output_df_restricted['BUCKET'] == '6. RE
 
 
 #Adicionar coluna de Governança
-output_df_restricted['GOVERNANCE'] = np.nan
+output_df_restricted['GOVERNANCE'] = 'ERROR'
 output_df_restricted['GOVERNANCE'][(output_df_restricted['FINAL_PPM_FLOOR'].notna()) & (output_df_restricted['BUCKET'] == '1. MANTENER') ]= 'A. PRICING'
 output_df_restricted['GOVERNANCE'][(output_df_restricted['FINAL_PPM_FLOOR'].notna()) & (output_df_restricted['BUCKET'] == '4. RENTABILIZAR A TARGET') & (output_df_restricted['FLAG_top20_AGGBRAND'] == 0)]= 'A. PRICING'
 output_df_restricted['GOVERNANCE'][(output_df_restricted['FINAL_PPM_FLOOR'].notna()) & (output_df_restricted['BUCKET'] == '4. RENTABILIZAR A TARGET') & (output_df_restricted['FLAG_top20_AGGBRAND'] == 1)]= 'B. MANAGER/DIRECTOR'
@@ -417,7 +417,7 @@ pd.crosstab(output_df_restricted['BUCKET'][output_df_restricted['ITE_ATT_BRAND']
 ### CREATING EXECUTIVE SUMMARY                    ########
 ##########################################################
 
-summary_df = output_df[['SIT_SITE_ID', 'VERTICAL', 'DOM_DOMAIN_AGG2', 'ITE_ATT_BRAND','BPC_original','BPC_ABC_original','BPC_potencial','BPC_tgt','VISITS_MATCH','VM_lm','VM_tgt','UE_CON_TGMV_AMT_LC_LM','TSI','TSI_NEW_X','BPC_NEW_X','UE_CON_TGMV_AMT_LC_LM_NEW_X','VM_LM_NEW_X_PERC_TGMV','CURRENT_PPM_FLOOR','FINAL_PPM_FLOOR','BUCKET','GOVERNANCE','DC_PERC_L6M']]
+summary_df = output_df[['SIT_SITE_ID', 'VERTICAL', 'DOM_DOMAIN_AGG2', 'ITE_ATT_BRAND','BPC_original','BPC_ABC_original','BPC_potencial','BPC_tgt','VISITS_MATCH','VM_lm','VM_tgt','UE_CON_TGMV_AMT_LC_LM','TSI','TSI_NEW_X','BPC_NEW_X','UE_CON_TGMV_AMT_LC_LM_NEW_X','VM_LM_NEW_X_PERC_TGMV','CURRENT_PPM_FLOOR','FINAL_PPM_FLOOR','BUCKET','GOVERNANCE','DC_PERC_L6M','FLAG_top20_AGGBRAND']]
 
 #Substituindo as colunas pós mudanças por sua versão restrita
 summary_df['OPTIMAL_PPM_FLOOR']= summary_df['FINAL_PPM_FLOOR']
@@ -446,10 +446,10 @@ summary_df['FLAG_ALL_BRANDS']= 0
 summary_df['FLAG_ALL_BRANDS'][summary_df['ITE_ATT_BRAND']=='ALL_BRANDS']= 1
 
 #Reordenando as colunas para facilitar a análise a posteriori
-summary_df_rearranged = summary_df[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND','CURRENT_PPM_FLOOR','OPTIMAL_PPM_FLOOR','FINAL_PPM_FLOOR','BPC_tgt','BPC_original','BPC_ABC_original','BPC_potencial','BPC_NEW_X','VM_tgt','VM_lm','VM_LM_NEW_X_PERC_TGMV','UE_CON_TGMV_AMT_LC_LM','UE_CON_TGMV_AMT_LC_LM_NEW_X','BUCKET','GOVERNANCE','VISITS_MATCH','VISITS_COMPETITIVE_POTENTIAL','VISITS_COMPETITIVE_POTENTIAL_NEW','UE_VM_LC','UE_VM_LC_NEW','UE_CON_TGMV_AMT_LC_LM','UE_CON_TGMV_AMT_LC_LM_NEW_X','TSI','TSI_NEW_X','FLAG_ALL_BRANDS','DC_PERC_L6M']]
+summary_df_rearranged = summary_df[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND','CURRENT_PPM_FLOOR','OPTIMAL_PPM_FLOOR','FINAL_PPM_FLOOR','BPC_tgt','BPC_original','BPC_ABC_original','BPC_potencial','BPC_NEW_X','VM_tgt','VM_lm','VM_LM_NEW_X_PERC_TGMV','UE_CON_TGMV_AMT_LC_LM','UE_CON_TGMV_AMT_LC_LM_NEW_X','FLAG_top20_AGGBRAND','BUCKET','GOVERNANCE','VISITS_MATCH','VISITS_COMPETITIVE_POTENTIAL','VISITS_COMPETITIVE_POTENTIAL_NEW','UE_VM_LC','UE_VM_LC_NEW','UE_CON_TGMV_AMT_LC_LM','UE_CON_TGMV_AMT_LC_LM_NEW_X','TSI','TSI_NEW_X','FLAG_ALL_BRANDS','DC_PERC_L6M']]
 
 #Alterando a coluna de Brands
-summary_df['ITE_ATT_BRAND'][summary_df['ITE_ATT_BRAND']=='ALL_BRANDS'] = 'OTHER_BRANDS'
+summary_df_rearranged['ITE_ATT_BRAND'][summary_df_rearranged['ITE_ATT_BRAND']=='ALL_BRANDS'] = 'OTHER_BRANDS'
 
 
 #############################################
