@@ -235,7 +235,7 @@ def bpc_calculator(bpc_df, agg_brands_df, example_df, min_ppm = -15, max_ppm = 5
   for new_ppm in range(min_ppm, max_ppm + 1):
 
     df_bpc_filtered['PRICE_TO_CHASE_X'] = np.where(df_bpc_filtered['COMP_PRICE_RIVAL'].isna(),df_bpc_filtered['PRICE_MELI2'], df_bpc_filtered[['COMP_PRICE_RIVAL','PRICE_MELI2']].values.min(1))
-    df_bpc_filtered['PPM_CALCULATED_FLOOR_PRICE_X'] = ((df_bpc['COST']-df_bpc['CCOGS'])*df_bpc['SIT_SITE_IVA'])/(1-new_ppm/100-df_bpc['FINANCIAL_COST']/100)
+    df_bpc_filtered['PPM_CALCULATED_FLOOR_PRICE_X'] = ((df_bpc_filtered['COST']-df_bpc_filtered['CCOGS'])*df_bpc_filtered['SIT_SITE_IVA'])/(1-new_ppm/100-df_bpc_filtered['FINANCIAL_COST']/100)
     df_bpc_filtered['PPM_CALCULATED_FLOOR_PRICE_X'] = df_bpc_filtered['PPM_CALCULATED_FLOOR_PRICE_X'].fillna(0)
     df_bpc_filtered['EFFECTIVE_FLOOR_PRICE_X'] = df_bpc_filtered['PPM_CALCULATED_FLOOR_PRICE_X'].copy()
     df_bpc_filtered['EFFECTIVE_FLOOR_PRICE_X'][ (df_bpc_filtered['PL1P_PRICING_CURRENT_WINNING_STRATEGY'] == 'DEAL') | (df_bpc_filtered['PL1P_PRICING_CURRENT_WINNING_STRATEGY'] == 'PROMO') | (df_bpc_filtered['PL1P_PRICING_CURRENT_WINNING_STRATEGY'] == 'MARKDOWN')] = df_bpc_filtered[['PPM_CALCULATED_FLOOR_PRICE_X','PRICE_MELI2']].min(axis=1)
