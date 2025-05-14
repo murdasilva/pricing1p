@@ -116,7 +116,7 @@ for site in df_bpc['SIT_SITE_ID'].unique():
 top20siteaggbrands= pd.DataFrame()
 for site in df_bpc['SIT_SITE_ID'].unique():
   df_tgmv = df_bpc[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND','TGMV_LC','VISITS_MATCH']][df_bpc['SIT_SITE_ID']==site].groupby(['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND']).sum().reset_index()
-  currenttop20keys = df_tgmv.sort_values('TGMV_LC', ascending = False).head(10)
+  currenttop20keys = df_tgmv.sort_values('TGMV_LC', ascending = False).head(20)
   currenttop20keys = currenttop20keys.merge(df_vm, how = 'left', left_on = ('SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND' ),right_on = ('SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND' ) )
   currenttop20keys=currenttop20keys[currenttop20keys['VISITS_MATCH']>0]
   currenttop20keys = currenttop20keys[currenttop20keys['UE_CON_TGMV_AMT_LC_L6CM'] > 0]
@@ -391,6 +391,8 @@ output_df_restricted['FINAL_PPM_FLOOR'][output_df_restricted['BUCKET'] == '2. CO
 output_df_restricted['FINAL_PPM_FLOOR'][output_df_restricted['BUCKET'] == '3. INVERTIR']= output_df_restricted[['NEW_PPM','CURRENT_PPM_FLOOR']].min(axis=1)
 output_df_restricted['FINAL_PPM_FLOOR'][output_df_restricted['BUCKET'] == '6. REVISAR']= output_df_restricted['CURRENT_PPM_FLOOR']
 
+output_df_restricted['BUCKET'][(output_df_restricted['FINAL_PPM_FLOOR']==output_df_restricted['CURRENT_PPM_FLOOR']) & (output_df_restricted['BUCKET']!='1. MANTENER')& (output_df_restricted['BUCKET']!='6. REVISAR')] = '1. MANTENER'
+
 
 #Adicionar coluna de Governança
 output_df_restricted['GOVERNANCE'] = 'ERROR'
@@ -427,8 +429,7 @@ summary_df['BPC_NEW_X'] = output_df_restricted['BPC_NEW_X']
 summary_df['UE_CON_TGMV_AMT_LC_LM_NEW_X'] = output_df_restricted['UE_CON_TGMV_AMT_LC_LM_NEW_X']
 summary_df['VM_LM_NEW_X_PERC_TGMV'] = output_df_restricted['VM_LM_NEW_X_PERC_TGMV']
 summary_df['GOVERNANCE'] = output_df_restricted['GOVERNANCE']
-
-
+summary_df['BUCKET'] = output_df_restricted['BUCKET']
 
 #Trazendo os valores finais para os casos onde não mudamos piso
 summary_df['FINAL_PPM_FLOOR'][(summary_df['BUCKET']=='1. MANTENER') | (summary_df['CURRENT_PPM_FLOOR']==summary_df['FINAL_PPM_FLOOR'])] = summary_df['CURRENT_PPM_FLOOR']
@@ -447,6 +448,9 @@ summary_df['FLAG_ALL_BRANDS'][summary_df['ITE_ATT_BRAND']=='ALL_BRANDS']= 1
 
 #Reordenando as colunas para facilitar a análise a posteriori
 summary_df_rearranged = summary_df[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND','CURRENT_PPM_FLOOR','OPTIMAL_PPM_FLOOR','FINAL_PPM_FLOOR','BPC_tgt','BPC_original','BPC_ABC_original','BPC_potencial','BPC_NEW_X','VM_tgt','VM_lm','VM_LM_NEW_X_PERC_TGMV','UE_CON_TGMV_AMT_LC_LM','UE_CON_TGMV_AMT_LC_LM_NEW_X','FLAG_top20_AGGBRAND','BUCKET','GOVERNANCE','VISITS_MATCH','VISITS_COMPETITIVE_POTENTIAL','VISITS_COMPETITIVE_POTENTIAL_NEW','UE_VM_LC','UE_VM_LC_NEW','UE_CON_TGMV_AMT_LC_LM','UE_CON_TGMV_AMT_LC_LM_NEW_X','TSI','TSI_NEW_X','FLAG_ALL_BRANDS','DC_PERC_L6M']]
+
+#Renomeando colunas
+summary_df_rearranged = summary_df_rearranged.rename(columns = {'BPC_NEW_X':'BPC_POTENCIAL_NEW','VM_tgt':'VM_tgt_OP','VM_lm':'VM_LAST_MONTH','VM_LM_NEW_X_PERC_TGMV':'VM_LAST_MONTH_NEW','DC_PERC_L6M':'DC_LAST_6_CLOSED_MONTHS','CURRENT_PPM_FLOOR':'AVERAGE_PPM_FLOOR_LAST_MONTH'})
 
 #############################################
 #Salvando o resultado
