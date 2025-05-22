@@ -132,7 +132,7 @@ top20verticalsaggbrands= pd.DataFrame()
 for site in df_bpc['SIT_SITE_ID'].unique():
     for vertical in df_bpc['VERTICAL'].unique():
         df_tgmv = df_bpc[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND','TGMV_LC','VISITS_MATCH']][(df_bpc['SIT_SITE_ID']==site) & (df_bpc['VERTICAL']==vertical)].groupby(['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND']).sum().reset_index()
-        currenttop20keys = df_tgmv.sort_values('TGMV_LC', ascending = False).head(10)
+        currenttop20keys = df_tgmv.sort_values('TGMV_LC', ascending = False).head(20)
         currenttop20keys = currenttop20keys.merge(df_vm, how = 'left', left_on = ('SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND' ),right_on = ('SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND' ) )
         currenttop20keys=currenttop20keys[currenttop20keys['VISITS_MATCH']>0]
         currenttop20keys = currenttop20keys[currenttop20keys['UE_CON_TGMV_AMT_LC_L6CM'] > 0]
@@ -297,10 +297,10 @@ for i in range(0,len(self_representative_agg_brands)):
 
 project_id = "meli-bi-data"
 
-table_id = 'SBOX_PRICING1P.TEMP_ALL_GRIDS_DF_TEST'
+table_id = 'SBOX_PRICING1P.TEMP_ALL_GRIDS_DF'
 
 
-pandas_gbq.to_gbq(all_grids_df, table_id, project_id=project_id)
+pandas_gbq.to_gbq(all_grids_df, table_id, project_id=project_id,if_exists='replace')
 
 
 # Adding new columns to output_df
