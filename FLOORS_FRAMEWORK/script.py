@@ -79,6 +79,10 @@ df_agg_brands_inputs['UE_MNG_NON_BANK_COUPONS_DISCOUNT_AMT_LC_LM'] = df_agg_bran
 df_agg_brands_inputs['UE_CON_CMV_AMT_LC_LM'] = df_agg_brands_inputs['UE_CON_CMV_AMT_LC_LM'].fillna(0)
 df_agg_brands_inputs['UE_MNG_OTHER_PRODUCT_COST_AMT_LC_LM'] = df_agg_brands_inputs['UE_MNG_OTHER_PRODUCT_COST_AMT_LC_LM'].fillna(0)
 df_agg_brands_inputs['UE_CON_CONTRACOGS_AMT_LC_LM'] = df_agg_brands_inputs['UE_CON_CONTRACOGS_AMT_LC_LM'].fillna(0)
+df_agg_brands_inputs['TGMV_USD_LM'] = df_agg_brands_inputs['TGMV_USD_LM'].fillna(0)
+df_agg_brands_inputs['SHARE_TGMV_USD_LM'] = df_agg_brands_inputs['SHARE_TGMV_USD_LM'].fillna(0)
+
+
 
 
 ##########################################################
@@ -101,17 +105,20 @@ df_bpc['VISITS_COMPETITIVE_POTENTIAL']=np.where(df_bpc[['PPM_CALCULATED_FLOOR_PR
 ### Finding the self representative AGG/Brands ###########
 ##########################################################
 
-top50siteaggbrands= pd.DataFrame()
+top500allaggbrands = pd.DataFrame()
+top500allaggbrands = df_agg_brands_inputs[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND','TGMV_USD_LM']].groupby(['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND']).sum().reset_index().sort_values(by='TGMV_USD_LM',ascending =False).head(500).reset_index(drop=True)
+
+# top50siteaggbrands= pd.DataFrame()
 df_vm = df_agg_brands_inputs[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND','UE_CON_TGMV_AMT_LC_L6CM','UE_CON_TGMV_AMT_LC_LM']].groupby(['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND']).sum().reset_index()
 
-for site in df_bpc['SIT_SITE_ID'].unique():
-  df_tgmv = df_bpc[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND','TGMV_LC','VISITS_MATCH']][df_bpc['SIT_SITE_ID']==site].groupby(['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND']).sum().reset_index()
-  currenttop50keys = df_tgmv.sort_values('TGMV_LC', ascending = False).head(50)
-  currenttop50keys = currenttop50keys.merge(df_vm, how = 'left', left_on = ('SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND' ),right_on = ('SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND' ) )
-  currenttop50keys=currenttop50keys[currenttop50keys['VISITS_MATCH']>0]
-  currenttop50keys = currenttop50keys[currenttop50keys['UE_CON_TGMV_AMT_LC_L6CM'] > 0]
-  currenttop50keys = currenttop50keys[currenttop50keys['UE_CON_TGMV_AMT_LC_LM'] > 0]
-  top50siteaggbrands = pd.concat([top50siteaggbrands,currenttop50keys])
+# for site in df_bpc['SIT_SITE_ID'].unique():
+#   df_tgmv = df_bpc[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND','TGMV_LC','VISITS_MATCH']][df_bpc['SIT_SITE_ID']==site].groupby(['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND']).sum().reset_index()
+#   currenttop50keys = df_tgmv.sort_values('TGMV_LC', ascending = False).head(50)
+#   currenttop50keys = currenttop50keys.merge(df_vm, how = 'left', left_on = ('SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND' ),right_on = ('SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND' ) )
+#   currenttop50keys=currenttop50keys[currenttop50keys['VISITS_MATCH']>0]
+#   currenttop50keys = currenttop50keys[currenttop50keys['UE_CON_TGMV_AMT_LC_L6CM'] > 0]
+#   currenttop50keys = currenttop50keys[currenttop50keys['UE_CON_TGMV_AMT_LC_LM'] > 0]
+#   top50siteaggbrands = pd.concat([top50siteaggbrands,currenttop50keys])
 
 
 top20siteaggbrands= pd.DataFrame()
@@ -127,17 +134,17 @@ for site in df_bpc['SIT_SITE_ID'].unique():
 top20siteaggbrands = top20siteaggbrands[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND']]
 top20siteaggbrands['FLAG_top20_AGGBRAND'] = 1
 
-top10verticalsaggbrands= pd.DataFrame()
+# top10verticalsaggbrands= pd.DataFrame()
 
-for site in df_bpc['SIT_SITE_ID'].unique():
-    for vertical in df_bpc['VERTICAL'].unique():
-        df_tgmv = df_bpc[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND','TGMV_LC','VISITS_MATCH']][(df_bpc['SIT_SITE_ID']==site) & (df_bpc['VERTICAL']==vertical)].groupby(['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND']).sum().reset_index()
-        currenttop10keys = df_tgmv.sort_values('TGMV_LC', ascending = False).head(10)
-        currenttop10keys = currenttop10keys.merge(df_vm, how = 'left', left_on = ('SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND' ),right_on = ('SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND' ) )
-        currenttop10keys=currenttop10keys[currenttop10keys['VISITS_MATCH']>0]
-        currenttop10keys = currenttop10keys[currenttop10keys['UE_CON_TGMV_AMT_LC_L6CM'] > 0]
-        currenttop10keys = currenttop10keys[currenttop10keys['UE_CON_TGMV_AMT_LC_LM'] > 0]
-        top10verticalsaggbrands = pd.concat([top10verticalsaggbrands,currenttop10keys])
+# for site in df_bpc['SIT_SITE_ID'].unique():
+#     for vertical in df_bpc['VERTICAL'].unique():
+#         df_tgmv = df_bpc[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND','TGMV_LC','VISITS_MATCH']][(df_bpc['SIT_SITE_ID']==site) & (df_bpc['VERTICAL']==vertical)].groupby(['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND']).sum().reset_index()
+#         currenttop10keys = df_tgmv.sort_values('TGMV_LC', ascending = False).head(10)
+#         currenttop10keys = currenttop10keys.merge(df_vm, how = 'left', left_on = ('SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND' ),right_on = ('SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND' ) )
+#         currenttop10keys=currenttop10keys[currenttop10keys['VISITS_MATCH']>0]
+#         currenttop10keys = currenttop10keys[currenttop10keys['UE_CON_TGMV_AMT_LC_L6CM'] > 0]
+#         currenttop10keys = currenttop10keys[currenttop10keys['UE_CON_TGMV_AMT_LC_LM'] > 0]
+#         top10verticalsaggbrands = pd.concat([top10verticalsaggbrands,currenttop10keys])
 
 
 
@@ -163,8 +170,8 @@ aggkeys['ITE_ATT_BRAND'] = 'ALL_BRANDS'
 
 self_representative_agg_brands = pd.concat(
    [
-      top50siteaggbrands[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND']]
-      ,top10verticalsaggbrands[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND']]
+      top500allaggbrands[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND']]
+      #,top10verticalsaggbrands[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND']]
       ,aggkeys[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND']]
     ]).drop_duplicates().sort_values(by = ['SIT_SITE_ID','VERTICAL']).reset_index(drop=True)
 
