@@ -396,7 +396,6 @@ for i in range(0,len(self_representative_agg_brands)):
   output_df_restricted = pd.concat([output_df_restricted,final_row])
   print(i)
 
-output_df_restricted = output_df_restricted[output_df_restricted['VISITS_MATCH']>0]
 
 #Adicionar Flag de Top 20
 output_df_restricted = output_df_restricted.merge(top20siteaggbrands, how = 'left', left_on = ('SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND'), right_on = ('SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND'))
@@ -444,6 +443,7 @@ pd.crosstab(output_df_restricted['BUCKET'][output_df_restricted['ITE_ATT_BRAND']
 ##########################################################
 
 summary_df = output_df[['SIT_SITE_ID', 'VERTICAL', 'DOM_DOMAIN_AGG2', 'ITE_ATT_BRAND','BPC_original','BPC_ABC_original','BPC_potencial','BPC_tgt','VISITS_MATCH','VM_lm','VM_tgt','UE_CON_TGMV_AMT_LC_LM','TSI','TSI_NEW_X','BPC_NEW_X','UE_CON_TGMV_AMT_LC_LM_NEW_X','VM_LM_NEW_X_PERC_TGMV','CURRENT_PPM_FLOOR','FINAL_PPM_FLOOR','BUCKET','GOVERNANCE','DC_PERC_L6M','FLAG_top20_AGGBRAND']]
+summary_df = summary_df[summary_df['VISITS_MATCH']>0]
 
 #Substituindo as colunas pós mudanças por sua versão restrita
 summary_df['OPTIMAL_PPM_FLOOR']= summary_df['FINAL_PPM_FLOOR']
