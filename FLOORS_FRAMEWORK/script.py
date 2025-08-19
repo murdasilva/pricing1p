@@ -57,6 +57,8 @@ df_bpc['TSI']=df_bpc['TSI'].fillna(0)
 
 
 df_bpc[['VISITS_COMPETITIVE','VISITS_MATCH']] = df_bpc[['VISITS_COMPETITIVE','VISITS_MATCH']].fillna(0)
+df_bpc[['VISITS_COMPETITIVE_A','VISITS_MATCH_A']] = df_bpc[['VISITS_COMPETITIVE_A','VISITS_MATCH_A']].fillna(0)
+
 df_bpc['FINANCIAL_COST'] = df_bpc['FINANCIAL_COST'].fillna(0)
 
 
@@ -90,16 +92,23 @@ df_agg_brands_inputs['SHARE_TGMV_USD_LM'] = df_agg_brands_inputs['SHARE_TGMV_USD
 ##########################################################
 
 df_bpc['VISITS_COMPETITIVE_ESTIMATED'] = np.where(df_bpc['PRICE_MELI'] <= 1.01*df_bpc['COMP_PRICE_RIVAL'], df_bpc['VISITS_MATCH'],0)
-df_bpc['PRICE_MELI2'] = np.where(df_bpc['PRICE_MELI'].isna(),df_bpc['TGMV_LC']/df_bpc['TSI'],df_bpc['PRICE_MELI'])
-df_bpc['PRICE_TO_CHASE'] = np.where(df_bpc['COMP_PRICE_RIVAL'].isna(),df_bpc['PRICE_MELI2'], df_bpc[['COMP_PRICE_RIVAL','PRICE_MELI2']].values.min(1))
-df_bpc['PPM_CALCULATED_FLOOR_PRICE_ESTIMATED'] = ((df_bpc['COST']-df_bpc['CCOGS'])*df_bpc['SIT_SITE_IVA'])/(1-df_bpc['PPM_PROFIT_FLOOR']/100-df_bpc['FINANCIAL_COST']/100).fillna(0)
+df_bpc['VISITS_COMPETITIVE_ESTIMATED_A'] = np.where(df_bpc['PRICE_MELI'] <= 1.01*df_bpc['COMP_PRICE_RIVAL_A'], df_bpc['VISITS_MATCH_A'],0)
 
+df_bpc['PRICE_MELI2'] = np.where(df_bpc['PRICE_MELI'].isna(),df_bpc['TGMV_LC']/df_bpc['TSI'],df_bpc['PRICE_MELI'])
+
+df_bpc['PRICE_TO_CHASE'] = np.where(df_bpc['COMP_PRICE_RIVAL'].isna(),df_bpc['PRICE_MELI2'], df_bpc[['COMP_PRICE_RIVAL','PRICE_MELI2']].values.min(1))
+
+df_bpc['PPM_CALCULATED_FLOOR_PRICE_ESTIMATED'] = ((df_bpc['COST']-df_bpc['CCOGS'])*df_bpc['SIT_SITE_IVA'])/(1-df_bpc['PPM_PROFIT_FLOOR']/100-df_bpc['FINANCIAL_COST']/100).fillna(0)
 
 df_bpc['EFFECTIVE_FLOOR_PRICE'] = df_bpc['PPM_CALCULATED_FLOOR_PRICE_ESTIMATED'].copy().fillna(0)
 df_bpc['EFFECTIVE_FLOOR_PRICE'][ (df_bpc['PL1P_PRICING_CURRENT_WINNING_STRATEGY'] == 'DEAL') | (df_bpc['PL1P_PRICING_CURRENT_WINNING_STRATEGY'] == 'PROMO') | (df_bpc['PL1P_PRICING_CURRENT_WINNING_STRATEGY'] == 'MARKDOWN')] = df_bpc[['PPM_CALCULATED_FLOOR_PRICE_ESTIMATED','PRICE_MELI2']].min(axis=1)
+
 df_bpc['PRICE_MELI_NEW'] = df_bpc[['PRICE_TO_CHASE','EFFECTIVE_FLOOR_PRICE']].values.max(1)
+
 df_bpc['TGMV_LC_ESTIMATED']=df_bpc['PRICE_MELI_NEW']*df_bpc['TSI']
+
 df_bpc['VISITS_COMPETITIVE_POTENTIAL']=np.where(df_bpc[['PPM_CALCULATED_FLOOR_PRICE','PRICE_MELI_NEW']].min(axis=1)<=1.01*df_bpc['COMP_PRICE_RIVAL'],df_bpc['VISITS_MATCH'],0)
+df_bpc['VISITS_COMPETITIVE_POTENTIAL_A']=np.where(df_bpc[['PPM_CALCULATED_FLOOR_PRICE','PRICE_MELI_NEW']].min(axis=1)<=1.01*df_bpc['COMP_PRICE_RIVAL_A'],df_bpc['VISITS_MATCH_A'],0)
 
 ##########################################################
 ### Finding the self representative AGG/Brands ###########
@@ -167,7 +176,6 @@ for site in df_bpc['SIT_SITE_ID'].unique():
 
 aggkeys['ITE_ATT_BRAND'] = 'ALL_BRANDS'
 
-
 self_representative_agg_brands = pd.concat(
    [
       top500allaggbrands[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND']]
@@ -175,13 +183,25 @@ self_representative_agg_brands = pd.concat(
       ,aggkeys[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND']]
     ]).drop_duplicates().sort_values(by = ['SIT_SITE_ID','VERTICAL']).reset_index(drop=True)
 
+self_representative_verticals = df_bpc[['SIT_SITE_ID','VERTICAL']].drop_duplicates().reset_index(drop=True).dropna()
+self_representative_verticals['DOM_DOMAIN_AGG2']='ALL_AGGS'
+self_representative_verticals['ITE_ATT_BRAND']='ALL_BRANDS'
+
+
 
 ##########################################################
 ### STARTING A PROOF OF CONCEPT OF THE CALCULATOR ########
 ##########################################################
 
 def mask_function(df,example_df):
-  if example_df['ITE_ATT_BRAND'].iloc[0] == 'ALL_BRANDS':
+  if example_df['DOM_DOMAIN_AGG2'].iloc[0] == 'ALL_AGGS':
+    mask =    ( 
+      (df['SIT_SITE_ID'] == example_df['SIT_SITE_ID'].iloc[0]) & 
+      (df['VERTICAL'] == example_df['VERTICAL'].iloc[0]) #& 
+      # (df['DOM_DOMAIN_AGG2'] == example_df['DOM_DOMAIN_AGG2'].iloc[0]) #& 
+      # (df_bpc['ITE_ATT_BRAND'] == example_df['ITE_ATT_BRAND'].iloc[0]) 
+    )
+  elif example_df['ITE_ATT_BRAND'].iloc[0] == 'ALL_BRANDS':
     mask =    ( 
       (df['SIT_SITE_ID'] == example_df['SIT_SITE_ID'].iloc[0]) & 
       (df['VERTICAL'] == example_df['VERTICAL'].iloc[0]) & 
@@ -212,9 +232,12 @@ def bpc_calculator(bpc_df, agg_brands_df, example_df, min_ppm = -15, max_ppm = 5
 
   newdf = example_df.copy()
   newdf['BPC_original']= df_bpc_filtered['VISITS_COMPETITIVE'].sum()/df_bpc_filtered['VISITS_MATCH'].sum()
+  newdf['BPC_A_original']= df_bpc_filtered['VISITS_COMPETITIVE_A'].sum()/df_bpc_filtered['VISITS_MATCH_A'].sum()
   newdf['BPC_ABC_original']= df_agg_brands_inputs_filtered['VISITS_COMPETITIVE_ABC'].sum()/df_agg_brands_inputs_filtered['VISITS_MATCH_ABC'].sum()
   newdf['BPC_estimado']= df_bpc_filtered['VISITS_COMPETITIVE_ESTIMATED'].sum()/df_bpc_filtered['VISITS_MATCH'].sum()
+  newdf['BPC_A_estimado']= df_bpc_filtered['VISITS_COMPETITIVE_ESTIMATED_A'].sum()/df_bpc_filtered['VISITS_MATCH_A'].sum()
   newdf['BPC_potencial']= df_bpc_filtered['VISITS_COMPETITIVE_POTENTIAL'].sum()/df_bpc_filtered['VISITS_MATCH'].sum()
+  newdf['BPC_A_potencial']= df_bpc_filtered['VISITS_COMPETITIVE_POTENTIAL_A'].sum()/df_bpc_filtered['VISITS_MATCH_A'].sum()
   newdf['BPC_tgt']= df_agg_brands_inputs_filtered['TARGET_PRIORIZED'].mean()
   newdf['VISITS_MATCH'] = df_bpc_filtered['VISITS_MATCH'].sum()
 
@@ -253,6 +276,7 @@ def bpc_calculator(bpc_df, agg_brands_df, example_df, min_ppm = -15, max_ppm = 5
     #df_bpc_filtered[['TSI','TSI_NEW_X ','B_EFECTIVO','PRICE_MELI2','PRICE_MELI_NEW_X']][df_bpc_filtered['TSI']!=df_bpc_filtered['TSI_NEW_X']]
     df_bpc_filtered['TGMV_LC_NEW_X']=df_bpc_filtered['PRICE_MELI_NEW_X']*df_bpc_filtered['TSI_NEW_X']
     df_bpc_filtered['VISITS_COMPETITIVE_NEW_X'] = np.where(df_bpc_filtered['PRICE_MELI_NEW_X'] <= 1.01*df_bpc_filtered['COMP_PRICE_RIVAL'], df_bpc_filtered['VISITS_MATCH'],0)
+    df_bpc_filtered['VISITS_COMPETITIVE_NEW_A_X'] = np.where(df_bpc_filtered['PRICE_MELI_NEW_X'] <= 1.01*df_bpc_filtered['COMP_PRICE_RIVAL_A'], df_bpc_filtered['VISITS_MATCH_A'],0)
 
 
     new_row =  newdf.copy()
@@ -260,6 +284,7 @@ def bpc_calculator(bpc_df, agg_brands_df, example_df, min_ppm = -15, max_ppm = 5
     new_row['TGMV_LC_NEW_X'] = df_bpc_filtered['TGMV_LC_NEW_X'].sum()
     new_row['TSI_NEW_X'] = df_bpc_filtered['TSI_NEW_X'].sum()
     new_row['BPC_NEW_X']= df_bpc_filtered['VISITS_COMPETITIVE_NEW_X'].sum()/df_bpc_filtered['VISITS_MATCH'].sum()
+    new_row['BPC_NEW_A_X']= df_bpc_filtered['VISITS_COMPETITIVE_NEW_A_X'].sum()/df_bpc_filtered['VISITS_MATCH_A'].sum()
     new_row['TSI_VALUED'] = (df_bpc_filtered['TSI']*df_bpc_filtered['COST']).sum()
     new_row['TSI_NEW_X_VALUED'] = (df_bpc_filtered['TSI_NEW_X']*df_bpc_filtered['COST']).sum()
 
@@ -292,8 +317,11 @@ output_df = pd.DataFrame()
 all_grids_df = pd.DataFrame()
 
 for i in range(0,len(self_representative_agg_brands)):
+#for i in range(0,len(self_representative_verticals)):
  
+  #example = self_representative_verticals.iloc[[i]]
   example = self_representative_agg_brands.iloc[[i]]
+  #final_row, grid_df = bpc_calculator(df_bpc, df_agg_brands_inputs, example, min_ppm = -30, max_ppm = 55)
   final_row, grid_df = bpc_calculator(df_bpc, df_agg_brands_inputs, example, min_ppm = -10, max_ppm = 55)
   output_df = pd.concat([output_df,final_row])
   all_grids_df = pd.concat([all_grids_df,grid_df])
@@ -303,8 +331,8 @@ for i in range(0,len(self_representative_agg_brands)):
 ## SAving the allgrids_df to a Bigquery table
 
 project_id = "meli-bi-data"
-
-table_id = 'SBOX_PRICING1P.TEMP_ALL_GRIDS_DF'
+table_id = 'SBOX_PRICING1P.TEMP_ALL_GRIDS_DF_OP_2026'
+#table_id = 'SBOX_PRICING1P.TEMP_ALL_GRIDS_DF'#
 
 
 pandas_gbq.to_gbq(all_grids_df, table_id, project_id=project_id,if_exists='replace')
