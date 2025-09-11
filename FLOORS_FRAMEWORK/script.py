@@ -288,12 +288,21 @@ def bpc_calculator(bpc_df, agg_brands_df, example_df, min_ppm = -15, max_ppm = 5
     new_row['TSI_VALUED'] = (df_bpc_filtered['TSI']*df_bpc_filtered['COST']).sum()
     new_row['TSI_NEW_X_VALUED'] = (df_bpc_filtered['TSI_NEW_X']*df_bpc_filtered['COST']).sum()
 
+
     new_row['UE_CON_TGMV_AMT_LC_LM_NEW_X'] = new_row['UE_CON_TGMV_AMT_LC_LM'] * new_row['TGMV_LC_NEW_X']/new_row['TGMV_LC_ESTIMATED']
     new_row['UE_MNG_REVENUE_GROSS_AMT_LC_LM_NEW_X'] = new_row['UE_MNG_REVENUE_GROSS_AMT_LC_LM'] * new_row['TGMV_LC_NEW_X']/new_row['TGMV_LC_ESTIMATED']
     new_row['UE_MNG_NON_BANK_COUPONS_DISCOUNT_AMT_LC_LM_NEW_X'] = new_row['UE_MNG_NON_BANK_COUPONS_DISCOUNT_AMT_LC_LM'] * 1
     new_row['UE_CON_CMV_AMT_LC_LM_NEW_X'] =  new_row['UE_CON_CMV_AMT_LC_LM'] * new_row['TSI_NEW_X_VALUED']/new_row['TSI_VALUED']
     new_row['UE_MNG_OTHER_PRODUCT_COST_AMT_LC_LM_NEW_X'] = new_row['UE_MNG_OTHER_PRODUCT_COST_AMT_LC_LM']* new_row['TSI_NEW_X_VALUED']/new_row['TSI_VALUED']
     new_row['UE_CON_CONTRACOGS_AMT_LC_LM_NEW_X'] = new_row['UE_CON_CONTRACOGS_AMT_LC_LM'] * 1
+
+    #Handling Missing Data
+    new_row['UE_CON_TGMV_AMT_LC_LM_NEW_X'] = new_row['UE_CON_TGMV_AMT_LC_LM_NEW_X'].fillna(new_row['UE_CON_TGMV_AMT_LC_LM'])
+    new_row['UE_MNG_REVENUE_GROSS_AMT_LC_LM_NEW_X'] = new_row['UE_MNG_REVENUE_GROSS_AMT_LC_LM_NEW_X'].fillna(new_row['UE_MNG_REVENUE_GROSS_AMT_LC_LM'])
+    new_row['UE_MNG_NON_BANK_COUPONS_DISCOUNT_AMT_LC_LM_NEW_X'] = new_row['UE_MNG_NON_BANK_COUPONS_DISCOUNT_AMT_LC_LM_NEW_X'].fillna(new_row['UE_MNG_NON_BANK_COUPONS_DISCOUNT_AMT_LC_LM'])
+    new_row['UE_CON_CMV_AMT_LC_LM_NEW_X'] =  new_row['UE_CON_CMV_AMT_LC_LM_NEW_X'].fillna(new_row['UE_CON_CMV_AMT_LC_LM'])
+    new_row['UE_MNG_OTHER_PRODUCT_COST_AMT_LC_LM_NEW_X'] = new_row['UE_MNG_OTHER_PRODUCT_COST_AMT_LC_LM_NEW_X'].fillna(new_row['UE_MNG_OTHER_PRODUCT_COST_AMT_LC_LM'])
+    new_row['UE_CON_CONTRACOGS_AMT_LC_LM_NEW_X'] = new_row['UE_CON_CONTRACOGS_AMT_LC_LM_NEW_X'].fillna(new_row['UE_CON_CONTRACOGS_AMT_LC_LM'])
     
     new_row['VM_LM_NEW_X_PERC_REV'] = (new_row['UE_MNG_REVENUE_GROSS_AMT_LC_LM_NEW_X'] + new_row['UE_MNG_NON_BANK_COUPONS_DISCOUNT_AMT_LC_LM_NEW_X'] + new_row['UE_CON_CMV_AMT_LC_LM_NEW_X'] + new_row['UE_MNG_OTHER_PRODUCT_COST_AMT_LC_LM_NEW_X'] + new_row['UE_CON_CONTRACOGS_AMT_LC_LM_NEW_X'])/(new_row['UE_MNG_REVENUE_GROSS_AMT_LC_LM_NEW_X']) 
     new_row['VM_LM_NEW_X_PERC_TGMV'] = (new_row['UE_MNG_REVENUE_GROSS_AMT_LC_LM_NEW_X'] + new_row['UE_MNG_NON_BANK_COUPONS_DISCOUNT_AMT_LC_LM_NEW_X'] + new_row['UE_CON_CMV_AMT_LC_LM_NEW_X'] + new_row['UE_MNG_OTHER_PRODUCT_COST_AMT_LC_LM_NEW_X'] + new_row['UE_CON_CONTRACOGS_AMT_LC_LM_NEW_X'])/(new_row['UE_CON_TGMV_AMT_LC_LM_NEW_X']) 
