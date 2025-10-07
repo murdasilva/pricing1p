@@ -114,8 +114,13 @@ df_bpc['VISITS_COMPETITIVE_POTENTIAL_A']=np.where(df_bpc[['PPM_CALCULATED_FLOOR_
 ### Finding the self representative AGG/Brands ###########
 ##########################################################
 
+df_visits = df_bpc[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND','VISITS_MATCH']].groupby(['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND']).sum().reset_index()
+df_tgmv_usd = df_agg_brands_inputs[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND','TGMV_USD_LM']].groupby(['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND']).sum().reset_index()
+df_visits_tgmv_usd = df_visits.merge(df_tgmv_usd, how = 'inner', left_on = ['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND'], right_on  = ['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND'])
+df_visits_tgmv_usd = df_visits_tgmv_usd[df_visits_tgmv_usd['VISITS_MATCH']>0]
+
 top500allaggbrands = pd.DataFrame()
-top500allaggbrands = df_agg_brands_inputs[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND','TGMV_USD_LM']].groupby(['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND']).sum().reset_index().sort_values(by='TGMV_USD_LM',ascending =False).head(500).reset_index(drop=True)
+top500allaggbrands = df_visits_tgmv_usd.sort_values(by='TGMV_USD_LM',ascending =False).head(500).reset_index(drop=True)
 
 # top50siteaggbrands= pd.DataFrame()
 df_vm = df_agg_brands_inputs[['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND','UE_CON_TGMV_AMT_LC_L6CM','UE_CON_TGMV_AMT_LC_LM']].groupby(['SIT_SITE_ID','VERTICAL','DOM_DOMAIN_AGG2','ITE_ATT_BRAND']).sum().reset_index()
