@@ -345,8 +345,8 @@ for i in range(0,len(self_representative_agg_brands)):
 ## SAving the allgrids_df to a Bigquery table
 
 project_id = "meli-bi-data"
-table_id = 'SBOX_PRICING1P.TEMP_ALL_GRIDS_DF_OP_2026'
-#table_id = 'SBOX_PRICING1P.TEMP_ALL_GRIDS_DF'#
+#table_id = 'SBOX_PRICING1P.TEMP_ALL_GRIDS_DF_OP_2026'
+table_id = 'SBOX_PRICING1P.TEMP_ALL_GRIDS_DF'#
 
 
 pandas_gbq.to_gbq(all_grids_df, table_id, project_id=project_id,if_exists='replace')
