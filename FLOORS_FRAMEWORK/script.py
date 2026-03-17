@@ -277,7 +277,7 @@ def bpc_calculator(bpc_df, agg_brands_df, example_df, min_ppm = -15, max_ppm = 5
     df_bpc_filtered['EFFECTIVE_FLOOR_PRICE_X'][ (df_bpc_filtered['PL1P_PRICING_CURRENT_WINNING_STRATEGY'] == 'DEAL') | (df_bpc_filtered['PL1P_PRICING_CURRENT_WINNING_STRATEGY'] == 'PROMO') | (df_bpc_filtered['PL1P_PRICING_CURRENT_WINNING_STRATEGY'] == 'MARKDOWN')] = df_bpc_filtered[['PPM_CALCULATED_FLOOR_PRICE_X','PRICE_MELI2']].min(axis=1)
     df_bpc_filtered['PRICE_MELI_NEW_X'] = df_bpc_filtered[['PRICE_TO_CHASE_X','EFFECTIVE_FLOOR_PRICE_X']].values.max(1)
     # df_bpc_filtered['TSI_NEW_X'] =  df_bpc_filtered['TSI']
-    df_bpc_filtered['TSI_NEW_X'] =  df_bpc_filtered['TSI']*((1+df_bpc_filtered['B_EFECTIVO']/100)**(100*((df_bpc_filtered['PRICE_MELI_NEW_X'] - df_bpc_filtered['PRICE_MELI2'])/df_bpc_filtered['PRICE_MELI2'])))
+    df_bpc_filtered['TSI_NEW_X'] =  df_bpc_filtered['TSI']*((1+df_bpc_filtered['B_EFECTIVO']/100)**(100*((df_bpc_filtered['PRICE_MELI_NEW_X'] - df_bpc_filtered['PRICE_MELI2'])/df_bpc_filtered['PRICE_MELI2']))) ## CORRIGIR!
     #df_bpc_filtered[['TSI','TSI_NEW_X ','B_EFECTIVO','PRICE_MELI2','PRICE_MELI_NEW_X']][df_bpc_filtered['TSI']!=df_bpc_filtered['TSI_NEW_X']]
     df_bpc_filtered['TGMV_LC_NEW_X']=df_bpc_filtered['PRICE_MELI_NEW_X']*df_bpc_filtered['TSI_NEW_X']
     df_bpc_filtered['VISITS_COMPETITIVE_NEW_X'] = np.where(df_bpc_filtered['PRICE_MELI_NEW_X'] <= 1.01*df_bpc_filtered['COMP_PRICE_RIVAL'], df_bpc_filtered['VISITS_MATCH'],0)
