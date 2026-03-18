@@ -107,7 +107,7 @@ df_bpc['PRICE_MELI_NEW'] = df_bpc[['PRICE_TO_CHASE','EFFECTIVE_FLOOR_PRICE']].va
 
 df_bpc['TGMV_LC_ESTIMATED']=df_bpc['PRICE_MELI_NEW']*df_bpc['TSI']
 
-df_bpc['VISITS_COMPETITIVE_POTENTIAL']=np.where(df_bpc[['PPM_CALCULATED_FLOOR_PRICE','PRICE_MELI_NEW']].min(axis=1)<=1.01*df_bpc['COMP_PRICE_RIVAL'],df_bpc['VISITS_MATCH'],0)
+df_bpc['VISITS_COMPETITIVE_POTENTIAL']=np.where([['PPM_CALCULATED_FLOOR_PRICE','PRICE_MELI_NEW']].min(axis=1)<=1.01*df_bpc['COMP_PRICE_RIVAL'],df_bpc['VISITS_MATCH'],0)
 df_bpc['VISITS_COMPETITIVE_POTENTIAL_A']=np.where(df_bpc[['PPM_CALCULATED_FLOOR_PRICE','PRICE_MELI_NEW']].min(axis=1)<=1.01*df_bpc['COMP_PRICE_RIVAL_A'],df_bpc['VISITS_MATCH_A'],0)
 
 ##########################################################
@@ -347,8 +347,8 @@ for i in range(0,len(self_representative_agg_brands)):
 
 project_id = "meli-bi-data"
 #table_id = 'SBOX_PRICING1P.TEMP_ALL_GRIDS_DF_OP_2026'
-#table_id = 'SBOX_PRICING1P.TEMP_ALL_GRIDS_DF'#
-table_id = 'SBOX_PRICING1P.TEMP_ALL_GRIDS_DF_TEST'#
+table_id = 'SBOX_PRICING1P.TEMP_ALL_GRIDS_DF'#
+#table_id = 'SBOX_PRICING1P.TEMP_ALL_GRIDS_DF_TEST'#
 
 
 pandas_gbq.to_gbq(all_grids_df, table_id, project_id=project_id,if_exists='replace')
